@@ -161,8 +161,11 @@ class _TaskSubmitScreenState extends State<TaskSubmitScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(task['title'] ?? 'Thực hiện nhiệm vụ'),
-        backgroundColor: AppTheme.lightTheme.appBarTheme.backgroundColor,
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.black),
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
       ),
       body: SingleChildScrollView(
         child: Padding(

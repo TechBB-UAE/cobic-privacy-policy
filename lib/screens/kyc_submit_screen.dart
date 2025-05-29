@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import 'package:cobic/providers/profile_provider.dart';
 import 'package:cobic/screens/main_tab_screen.dart';
 import 'package:image/image.dart' as img;
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class KycSubmitScreen extends StatefulWidget {
   const KycSubmitScreen({Key? key}) : super(key: key);
@@ -50,6 +51,16 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
     return 'jpeg'; // default
   }
 
+  Future<List<int>> compressImage(String filePath) async {
+    return await FlutterImageCompress.compressWithFile(
+      filePath,
+      minWidth: 1024,
+      minHeight: 1024,
+      quality: 70,
+      format: CompressFormat.jpeg,
+    ) ?? [];
+  }
+
   Future<void> _submitKyc() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCountry == null || _country.isEmpty) {
@@ -61,21 +72,9 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
       return;
     }
     try {
-      final frontBytes = await _idCardFrontFile!.readAsBytes();
-      final backBytes = await _idCardBackFile!.readAsBytes();
-      final selfieBytes = await _selfieWithIdCardFile!.readAsBytes();
-
-      final frontImage = img.decodeImage(frontBytes);
-      final backImage = img.decodeImage(backBytes);
-      final selfieImage = img.decodeImage(selfieBytes);
-
-      if (frontImage == null || backImage == null || selfieImage == null) {
-        throw Exception('Không thể xử lý ảnh');
-      }
-
-      final compressedFront = img.encodeJpg(frontImage, quality: 60);
-      final compressedBack = img.encodeJpg(backImage, quality: 60);
-      final compressedSelfie = img.encodeJpg(selfieImage, quality: 60);
+      final compressedFront = await compressImage(_idCardFrontFile!.path);
+      final compressedBack = await compressImage(_idCardBackFile!.path);
+      final compressedSelfie = await compressImage(_selfieWithIdCardFile!.path);
 
       final formData = FormData.fromMap({
         "fullName": _fullNameController.text,

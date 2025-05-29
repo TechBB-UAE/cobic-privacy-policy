@@ -45,7 +45,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
       _usernameController.text = userInfo['username'] ?? '';
       _fullNameController.text = userInfo['fullName'] ?? '';
       _emailController.text = userInfo['email'] ?? '';
-      _phoneController.text = userInfo['phone'] ?? '';
+      _phoneController.text = userInfo['phoneNumber'] ?? '';
       _addressController.text = userInfo['address'] ?? '';
       _bioController.text = userInfo['bio'] ?? '';
       if (userInfo['dateOfBirth'] != null) {
@@ -78,7 +78,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
               primary: AppTheme.lightTheme.primaryColor,
               onPrimary: Colors.white,
               surface: AppTheme.lightTheme.cardTheme.color!,
-              onSurface: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
           child: child!,
@@ -131,16 +131,36 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
       // Update username nếu có thay đổi
       if (_usernameController.text != Provider.of<ProfileProvider>(context, listen: false).userInfo?['username']) {
         final usernameResponse = await ProfileService.updateUsername(_usernameController.text);
-        if (usernameResponse is Map && usernameResponse['error'] != null) {
-          throw Exception(usernameResponse['error']);
+        if (usernameResponse is Map && usernameResponse['success'] == false) {
+          String msg = usernameResponse['message']?.toString().toLowerCase() ?? '';
+          if (msg.contains('already in use') || msg.contains('tồn tại')) {
+            setState(() {
+              _error = 'Tên đăng nhập đã tồn tại';
+            });
+          } else {
+            setState(() {
+              _error = usernameResponse['message'] ?? 'Có lỗi xảy ra khi cập nhật tên đăng nhập';
+            });
+          }
+          return;
         }
       }
 
       // Update email nếu có thay đổi
       if (_emailController.text != Provider.of<ProfileProvider>(context, listen: false).userInfo?['email']) {
         final emailResponse = await ProfileService.updateEmail(_emailController.text);
-        if (emailResponse is Map && emailResponse['error'] != null) {
-          throw Exception(emailResponse['error']);
+        if (emailResponse is Map && emailResponse['success'] == false) {
+          String msg = emailResponse['message']?.toString().toLowerCase() ?? '';
+          if (msg.contains('already in use') || msg.contains('tồn tại')) {
+            setState(() {
+              _error = 'Email đã tồn tại';
+            });
+          } else {
+            setState(() {
+              _error = emailResponse['message'] ?? 'Có lỗi xảy ra khi cập nhật email';
+            });
+          }
+          return;
         }
       }
 
@@ -153,23 +173,23 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
         'bio': _bioController.text,
         'phone': _phoneController.text,
       });
-
-      if (response is Map && response['error'] == null) {
-        // Gọi lại API lấy user info mới nhất
-        await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo();
-        if (mounted) {
-          ErrorUtils.showSuccessToast(context, 'Cập nhật hồ sơ thành công!');
-          await Future.delayed(const Duration(milliseconds: 1200));
-          if (widget.navigatorKey != null) {
-            widget.navigatorKey!.currentState?.popUntil((route) => route.settings.name == '/profile');
-          } else {
-            Navigator.of(context).pop();
-          }
-        }
-      } else {
+      if (response is Map && response['success'] == false) {
         setState(() {
-          _error = 'Có lỗi xảy ra: ${response['error'] ?? 'Không xác định'}';
+          _error = response['message'] ?? 'Có lỗi xảy ra khi cập nhật hồ sơ';
         });
+        return;
+      }
+
+      // Gọi lại API lấy user info mới nhất
+      await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo();
+      if (mounted) {
+        ErrorUtils.showSuccessToast(context, 'Cập nhật hồ sơ thành công!');
+        await Future.delayed(const Duration(milliseconds: 1200));
+        if (widget.navigatorKey != null) {
+          widget.navigatorKey!.currentState?.popUntil((route) => route.settings.name == '/profile');
+        } else {
+          Navigator.of(context).pop();
+        }
       }
     } catch (e) {
       setState(() {
@@ -231,7 +251,12 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                         : null,
                   ),
                   onChanged: (_) => _checkUsername(),
-                  validator: (value) => null,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập tên đăng nhập';
+                    if (value.length < 4 || value.length > 32) return 'Tên đăng nhập từ 4-32 ký tự';
+                    if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) return 'Chỉ cho phép chữ, số, dấu gạch dưới';
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -240,7 +265,11 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                     labelText: 'Họ và tên',
                     border: OutlineInputBorder(),
                   ),
-                  validator: (value) => null,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập họ và tên';
+                    if (value.trim().length < 2) return 'Họ và tên tối thiểu 2 ký tự';
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -251,7 +280,12 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) => null,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập email';
+                    final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.[a-zA-Z]{2,}');
+                    if (!emailRegex.hasMatch(value.trim())) return 'Email không hợp lệ';
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 InkWell(
@@ -299,12 +333,20 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(_selectedCountry?.name ?? 'Chọn quốc gia'),
+                        Text(_selectedCountry?.name ?? 'Chọn quốc gia',
+                            style: TextStyle(
+                              color: (_selectedCountry == null) ? Colors.red : Colors.black,
+                            )),
                         const Icon(Icons.arrow_drop_down),
                       ],
                     ),
                   ),
                 ),
+                if (_selectedCountry == null)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 4),
+                    child: Text('Vui lòng chọn quốc gia', style: TextStyle(color: Colors.red, fontSize: 12)),
+                  ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _phoneController,
@@ -315,7 +357,12 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                     prefixText: _selectedCountry?.phoneCode != null ? '+${_selectedCountry!.phoneCode} ' : null,
                   ),
                   keyboardType: TextInputType.phone,
-                  validator: (value) => null,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập số điện thoại';
+                    final phoneRegex = RegExp(r'^(0[0-9]{9,10}|[1-9][0-9]{8,14})$');
+                    if (!phoneRegex.hasMatch(value.trim())) return 'Số điện thoại không hợp lệ';
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -341,23 +388,68 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                   validator: (value) => null,
                 ),
                 const SizedBox(height: 16),
-                InkWell(
-                  onTap: () => _selectDate(context),
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Ngày sinh',
-                      border: OutlineInputBorder(),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Builder(
+                  builder: (context) {
+                    final userInfo = Provider.of<ProfileProvider>(context);
+                    final kycStatus = userInfo.userInfo?['kycStatus']?.toString().toLowerCase();
+                    final isKycApproved = kycStatus == 'approved';
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(_selectedDate != null
-                            ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-                            : 'Chọn ngày sinh'),
-                        const Icon(Icons.calendar_today),
+                        InkWell(
+                          onTap: isKycApproved ? null : () => _selectDate(context),
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'Ngày sinh',
+                              border: OutlineInputBorder(),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  _selectedDate != null
+                                      ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+                                      : 'Chọn ngày sinh',
+                                  style: TextStyle(
+                                    color: isKycApproved ? Colors.grey : Colors.black,
+                                  ),
+                                ),
+                                const Icon(Icons.calendar_today),
+                              ],
+                            ),
+                          ),
+                        ),
+                        if (!isKycApproved)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Builder(
+                              builder: (context) {
+                                return Text(
+                                  _selectedDate == null
+                                      ? 'Vui lòng chọn ngày sinh'
+                                      : (() {
+                                          final now = DateTime.now();
+                                          final dob = _selectedDate!;
+                                          final age = now.year - dob.year - ((now.month < dob.month || (now.month == dob.month && now.day < dob.day)) ? 1 : 0);
+                                          if (age < 18) return 'Bạn phải đủ 18 tuổi trở lên';
+                                          return '';
+                                        })(),
+                                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                                );
+                              },
+                            ),
+                          ),
+                        if (isKycApproved)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4),
+                            child: Text(
+                              'Không thể thay đổi ngày sinh sau khi KYC thành công',
+                              style: TextStyle(color: Colors.red, fontSize: 12),
+                            ),
+                          ),
                       ],
-                    ),
-                  ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(

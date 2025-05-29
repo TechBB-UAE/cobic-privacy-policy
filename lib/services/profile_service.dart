@@ -96,9 +96,24 @@ class ProfileService {
       return response.data;
     } catch (e) {
       if (e is DioException) {
+        final data = e.response?.data;
+        String message;
+        if (data is String) {
+          message = data;
+        } else if (data is Map) {
+          if (data['error'] != null) {
+            message = data['error'];
+          } else if (data['message'] != null) {
+            message = data['message'];
+          } else {
+            message = 'Có lỗi xảy ra';
+          }
+        } else {
+          message = 'Có lỗi xảy ra';
+        }
         return {
           'success': false,
-          'message': e.response?.data['message'] ?? 'Có lỗi xảy ra',
+          'message': message,
         };
       }
       return {
@@ -125,9 +140,24 @@ class ProfileService {
       return response.data;
     } catch (e) {
       if (e is DioException) {
+        final data = e.response?.data;
+        String message;
+        if (data is String) {
+          message = data;
+        } else if (data is Map) {
+          if (data['error'] != null) {
+            message = data['error'];
+          } else if (data['message'] != null) {
+            message = data['message'];
+          } else {
+            message = 'Có lỗi xảy ra';
+          }
+        } else {
+          message = 'Có lỗi xảy ra';
+        }
         return {
           'success': false,
-          'message': e.response?.data['message'] ?? 'Có lỗi xảy ra',
+          'message': message,
         };
       }
       return {
@@ -154,9 +184,24 @@ class ProfileService {
       return response.data;
     } catch (e) {
       if (e is DioException) {
+        final data = e.response?.data;
+        String message;
+        if (data is String) {
+          message = data;
+        } else if (data is Map) {
+          if (data['error'] != null) {
+            message = data['error'];
+          } else if (data['message'] != null) {
+            message = data['message'];
+          } else {
+            message = 'Có lỗi xảy ra';
+          }
+        } else {
+          message = 'Có lỗi xảy ra';
+        }
         return {
           'success': false,
-          'message': e.response?.data['message'] ?? 'Có lỗi xảy ra',
+          'message': message,
         };
       }
       return {

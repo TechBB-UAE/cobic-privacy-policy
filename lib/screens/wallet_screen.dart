@@ -137,6 +137,23 @@ class _WalletScreenState extends State<WalletScreen> {
     setState(() => isSending = false);
   }
 
+  String _getTransactionTypeVN(String? type) {
+    switch (type) {
+      case 'mining':
+        return 'Khai thác';
+      case 'daily_check_in':
+        return 'Điểm danh';
+      case 'transfer':
+        return 'Chuyển tiền';
+      case 'qr_scan':
+        return 'Quét QR';
+      case 'bounty':
+        return 'Thưởng nhiệm vụ';
+      default:
+        return type ?? '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final profileProvider = Provider.of<ProfileProvider>(context);
@@ -310,7 +327,7 @@ class _WalletScreenState extends State<WalletScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              item['type'] ?? '',
+                              _getTransactionTypeVN(item['type']),
                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
                               overflow: TextOverflow.ellipsis,
                             ),

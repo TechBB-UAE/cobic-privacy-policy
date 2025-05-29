@@ -395,7 +395,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                             contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                           ),
-                          style: TextStyle(color: Colors.white, fontSize: 15),
+                          style: TextStyle(color: Colors.black, fontSize: 15),
                           enabled: !_isSubmitting,
                         ),
                       ),
