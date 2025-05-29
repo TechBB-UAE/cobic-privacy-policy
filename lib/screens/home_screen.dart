@@ -23,6 +23,7 @@ import 'package:cobic/utils/navigation_helper.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/services/profile_service.dart';
 import 'package:cobic/screens/scan_qr_screen.dart';
+import 'package:cobic/screens/user_info_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -133,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return Center(
           child: RepaintBoundary(
             key: _popupKey,
-            child: _UserInfoCard(
+            child: UserInfoCard(
               username: username,
               password: password,
             ),
@@ -151,17 +152,28 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget buildLoginButton() {
+    final isLoggedIn = _token != null;
+    final labelText = isLoggedIn
+        ? ((_username != null && _username!.isNotEmpty) ? _username! : 'Tài khoản')
+        : 'Đăng nhập';
+
     return OutlinedButton.icon(
       style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.white,
-        side: const BorderSide(color: Colors.white),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        backgroundColor: Colors.white,
+        foregroundColor: AppTheme.textColor,
+        side: BorderSide(color: Colors.grey.shade300, width: 1.2),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        textStyle: const TextStyle(
+          color: AppTheme.textColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
         ),
       ),
       onPressed: () async {
-        if (_token != null) {
+        if (isLoggedIn) {
           Navigator.of(context).pushReplacementNamed('/main');
           await _checkLoginStatus();
         } else {
@@ -169,11 +181,11 @@ class _HomeScreenState extends State<HomeScreen> {
           await _checkLoginStatus();
         }
       },
-      icon: const Icon(Icons.person, color: Colors.white, size: 22),
+      icon: const Icon(Icons.person, color: AppTheme.textColor, size: 22),
       label: Text(
-        _token != null ? (_username ?? 'Tài khoản') : 'Đăng nhập',
+        labelText,
         style: const TextStyle(
-          color: Colors.white,
+          color: AppTheme.textColor,
           fontWeight: FontWeight.bold,
           height: 1.3,
         ),
@@ -187,75 +199,29 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A0742),
+        backgroundColor: AppTheme.appBarHomeColor,
+        iconTheme: const IconThemeData(color: AppTheme.textColor),
         elevation: 0,
-        title: null,
         automaticallyImplyLeading: false,
         actions: [
           if (_token != null)
-            PopupMenuButton<String>(
-              offset: const Offset(0, 56),
-              color: AppTheme.lightTheme.cardTheme.color,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: BorderSide(color: AppTheme.lightTheme.primaryColor, width: 1),
-              ),
-              icon: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.cardTheme.color,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppTheme.lightTheme.primaryColor, width: 1.5),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.person, color: Colors.white, size: 22),
-                    const SizedBox(width: 8),
-                    Text(
-                      _username ?? 'Tài khoản',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        height: 1.2,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              onSelected: (value) async {
-                if (value == 'profile') {
-                  Navigator.of(context).pushReplacementNamed('/main');
-                } else if (value == 'logout') {
-                  await ProfileService.logout();
-                  Provider.of<ProfileProvider>(context, listen: false).userInfo = null;
-                  Provider.of<ProfileProvider>(context, listen: false).error = null;
-                  Provider.of<ProfileProvider>(context, listen: false).isLoading = false;
-                  Provider.of<MiningProvider>(context, listen: false).reset();
-                  ErrorUtils.showSuccessToast(context, 'Đăng xuất thành công!');
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => const HomeScreen()),
-                    (route) => false,
-                  );
-                }
+            _UserMenuButton(
+              username: (_username != null && _username!.isNotEmpty) ? _username! : 'Tài khoản',
+              onProfile: () {
+                Navigator.of(context).pushReplacementNamed('/main');
               },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'profile',
-                  height: 48,
-                  child: Center(
-                    child: Text('Trang cá nhân', style: TextStyle(color: AppTheme.textColor, fontSize: 16)),
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'logout',
-                  height: 48,
-                  child: Center(
-                    child: Text('Đăng xuất', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 16)),
-                  ),
-                ),
-              ],
+              onLogout: () async {
+                await ProfileService.logout();
+                Provider.of<ProfileProvider>(context, listen: false).userInfo = null;
+                Provider.of<ProfileProvider>(context, listen: false).error = null;
+                Provider.of<ProfileProvider>(context, listen: false).isLoading = false;
+                Provider.of<MiningProvider>(context, listen: false).reset();
+                ErrorUtils.showSuccessToast(context, 'Đăng xuất thành công!');
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                  (route) => false,
+                );
+              },
             )
           else
           Container(
@@ -283,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 40),
             SizedBox(
-              width: 280,
+              width: 340,
               child: ElevatedButton(
                 style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
                   foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
@@ -323,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             SizedBox(
-              width: 280,
+              width: 340,
               child: OutlinedButton(
                 onPressed: () async {
                   final token = await _secureStorage.read(key: 'token');
@@ -360,214 +326,134 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// Widget hiển thị thông tin tài khoản và callback khi build xong
-class _UserInfoCard extends StatefulWidget {
+class _UserMenuButton extends StatefulWidget {
   final String username;
-  final String password;
-  const _UserInfoCard({required this.username, required this.password});
+  final VoidCallback onProfile;
+  final VoidCallback onLogout;
+  const _UserMenuButton({required this.username, required this.onProfile, required this.onLogout});
 
   @override
-  State<_UserInfoCard> createState() => _UserInfoCardState();
+  State<_UserMenuButton> createState() => _UserMenuButtonState();
 }
 
-class _UserInfoCardState extends State<_UserInfoCard> {
-  String? _message;
-  Color _messageColor = Colors.green;
-  final GlobalKey _infoKey = GlobalKey();
+class _UserMenuButtonState extends State<_UserMenuButton> {
+  OverlayEntry? _overlayEntry;
+
+  void _showMenu() {
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final Offset offset = button.localToGlobal(Offset.zero);
+    final Size size = button.size;
+    _overlayEntry = OverlayEntry(
+      builder: (context) => GestureDetector(
+        onTap: _hideMenu,
+        behavior: HitTestBehavior.translucent,
+        child: Stack(
+          children: [
+            Positioned(
+              top: offset.dy + size.height + 8,
+              left: offset.dx + size.width - 180,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  width: 180,
+                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          _hideMenu();
+                          widget.onProfile();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            'Trang cá nhân',
+                            style: TextStyle(
+                              color: AppTheme.textColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      GestureDetector(
+                        onTap: () {
+                          _hideMenu();
+                          widget.onLogout();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            'Đăng xuất',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _hideMenu() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 500));
-      print('Bắt đầu chụp widget thông tin...');
-      await _captureAndSaveInfo();
-    });
-  }
-
-  Future<void> _copyToClipboard(String text, String label) async {
-    await Clipboard.setData(ClipboardData(text: text));
-    setState(() {
-      _message = '$label đã được sao chép!';
-      _messageColor = Colors.blueAccent;
-    });
-  }
-
-  Future<void> _captureAndSaveInfo() async {
-    try {
-      RenderRepaintBoundary boundary = _infoKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      Uint8List pngBytes = byteData!.buffer.asUint8List();
-
-      var photosStatus = await Permission.photos.request();
-      var storageStatus = await Permission.storage.request();
-
-      if (photosStatus.isGranted || storageStatus.isGranted) {
-        final result = await ImageGallerySaver.saveImage(
-          pngBytes,
-          quality: 100,
-          name: "cobic_guest_info_${DateTime.now().millisecondsSinceEpoch}"
-        );
-        print('Save image result: ' + result.toString());
-        if ((result['isSuccess'] == true || result['isSuccess'] == 1) && mounted) {
-          setState(() {
-            _message = 'Đã lưu thông tin vào thư viện ảnh!';
-            _messageColor = Colors.green;
-          });
-        } else {
-          setState(() {
-            _message = 'Lưu ảnh thất bại! (result: ${result.toString()})';
-            _messageColor = Colors.red;
-          });
-        }
-      } else {
-        setState(() {
-          _message = 'Không có quyền lưu ảnh vào Photos!';
-          _messageColor = Colors.red;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _message = 'Lưu ảnh thất bại! ($e)';
-        _messageColor = Colors.red;
-      });
-      print('Lỗi khi chụp/lưu ảnh: $e');
-    }
+  void dispose() {
+    _hideMenu();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xFF2D1457),
-      borderRadius: BorderRadius.circular(16),
+    return GestureDetector(
+      onTap: _showMenu,
       child: Container(
-        width: 340,
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF2D1457),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.grey.shade300, width: 1.2),
         ),
-        child: Column(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Widget chụp ảnh chuyên nghiệp
-            RepaintBoundary(
-              key: _infoKey,
-              child: Container(
-                width: 300,
-                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2D1457),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white24, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.10),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/images/logo.gif',
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.contain,
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Tài khoản khách',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                        color: Colors.white,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    // Tên đăng nhập + nút copy
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Tên đăng nhập:', style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white70)),
-                        IconButton(
-                          icon: const Icon(Icons.copy, size: 18, color: Colors.white70),
-                          tooltip: 'Sao chép tên đăng nhập',
-                          onPressed: () => _copyToClipboard(widget.username, 'Tên đăng nhập'),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      widget.username,
-                      style: const TextStyle(
-                        color: Color(0xFFB266FF),
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.1,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    // Mật khẩu + nút copy
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Mật khẩu:', style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white70)),
-                        IconButton(
-                          icon: const Icon(Icons.copy, size: 18, color: Colors.white70),
-                          tooltip: 'Sao chép mật khẩu',
-                          onPressed: () => _copyToClipboard(widget.password, 'Mật khẩu'),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      widget.password,
-                      style: const TextStyle(
-                        color: Color(0xFFB266FF),
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.1,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 18),
-                    const Text(
-                      'Lưu lại thông tin này để đăng nhập về sau!',
-                      style: TextStyle(color: Colors.white54, fontSize: 13, fontStyle: FontStyle.italic),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+            const Icon(Icons.person, color: AppTheme.textColor, size: 22),
+            const SizedBox(width: 8),
+            Text(
+              widget.username,
+              style: const TextStyle(
+                color: AppTheme.textColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                height: 1.2,
               ),
-            ),
-            const SizedBox(height: 20),
-            // Thông báo
-            if (_message != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  _message!,
-                  style: TextStyle(color: _messageColor, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Đóng', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

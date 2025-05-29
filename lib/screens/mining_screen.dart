@@ -105,11 +105,11 @@ class _MiningScreenState extends State<MiningScreen> {
     return Scaffold(
       appBar: CustomAppBar(
         titleText: 'Khai thác',
-        backgroundColor: AppTheme.lightTheme.appBarTheme.backgroundColor,
-        iconColor: Colors.white,
+        backgroundColor: Colors.white,
+        iconColor: AppTheme.textColor,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.home, color: Colors.white),
+          icon: const Icon(Icons.home, color: AppTheme.textColor),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
               MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -119,7 +119,7 @@ class _MiningScreenState extends State<MiningScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+            icon: const Icon(Icons.qr_code_scanner, color: AppTheme.textColor),
             onPressed: widget.onScanQR,
           ),
         ],
@@ -142,18 +142,31 @@ class _MiningScreenState extends State<MiningScreen> {
                 ),
                 const SizedBox(height: 16),
                 // Mining rate
-                Text(
-                  widget.miningRate.toStringAsFixed(4),
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 32,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      widget.miningRate.toStringAsFixed(4),
+                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                            color: AppTheme.textColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 32,
+                          ),
+                    ),
+                    const SizedBox(width: 8),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        'Cobic/hr',
+                        style: TextStyle(
+                          color: AppTheme.lightTheme.primaryColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Cobic/hr',
-                  style: TextStyle(color: AppTheme.lightTheme.primaryColor, fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -162,11 +175,17 @@ class _MiningScreenState extends State<MiningScreen> {
                 ),
                 const SizedBox(height: 20),
                 // Card mining
-                Card(
-                  color: AppTheme.lightTheme.cardTheme.color,
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(20),
@@ -177,13 +196,28 @@ class _MiningScreenState extends State<MiningScreen> {
                           child: ElevatedButton.icon(
                             style: AppTheme.lightTheme.elevatedButtonTheme.style?.copyWith(
                               minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
-                              foregroundColor: MaterialStateProperty.all(Colors.white),
+                              foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+                                if (states.contains(MaterialState.disabled)) {
+                                  return AppTheme.textColor;
+                                }
+                                return Colors.white;
+                              }),
+                              backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+                                if (states.contains(MaterialState.disabled)) {
+                                  return Colors.grey.shade300;
+                                }
+                                return AppTheme.lightTheme.primaryColor;
+                              }),
                             ),
                             onPressed: widget.canMine ? _handleMining : null,
-                            icon: const Icon(Icons.bolt, size: 22, color: Colors.white),
-                            label: const Text(
+                            icon: Icon(Icons.bolt, size: 22, color: widget.canMine ? Colors.white : AppTheme.textColor),
+                            label: Text(
                               'bắt đầu khai thác ngay',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: widget.canMine ? Colors.white : AppTheme.textColor,
+                              ),
                             ),
                           ),
                         ),
@@ -214,12 +248,18 @@ class _MiningScreenState extends State<MiningScreen> {
                 ),
                 const SizedBox(height: 24),
                 // Card Quét VietQR
-                Card(
-                  color: AppTheme.lightTheme.cardTheme.color,
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
-                    side: BorderSide(color: AppTheme.lightTheme.primaryColor!, width: 1),
+                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(20),

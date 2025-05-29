@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cobic/theme/app_theme.dart';
+import 'package:cobic/theme/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:cobic/providers/referral_provider.dart';
 import 'package:cobic/models/referral_stats.dart';
@@ -43,20 +44,20 @@ class _ReferralScreenState extends State<ReferralScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Giới thiệu'),
+      appBar: CustomAppBar(
+        titleText: 'Giới thiệu',
+        backgroundColor: Colors.white,
+        iconColor: AppTheme.textColor,
         centerTitle: true,
-        backgroundColor: AppTheme.lightTheme.appBarTheme.backgroundColor,
-        iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
-          icon: const Icon(Icons.home, color: Colors.white),
+          icon: const Icon(Icons.home, color: AppTheme.textColor),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/home', (route) => false);
           },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+            icon: const Icon(Icons.qr_code_scanner, color: AppTheme.textColor),
             onPressed: () async {
               await Navigator.of(context, rootNavigator: true).push(
                 MaterialPageRoute(builder: (_) => const ScanQrScreen(targetRoute: '/home')),
@@ -100,118 +101,83 @@ class _ReferralScreenState extends State<ReferralScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Thống kê lượt mời
-                Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  elevation: 2,
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 6,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
                   margin: EdgeInsets.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Người đã mời', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 13)),
-                            const SizedBox(height: 2),
-                            Row(
-                              children: [
-                                Text('${stats.currentReferrals}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: AppTheme.lightTheme.primaryColor)),
-                                Text('/${stats.maxReferrals}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text('Lượt mời còn lại', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 13)),
-                            const SizedBox(height: 2),
-                            Text('${stats.remainingReferrals}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: AppTheme.lightTheme.primaryColor)),
-                          ],
-                        ),
-                      ],
-                    ),
+                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Người đã mời', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 13)),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Text('${stats.currentReferrals}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: AppTheme.lightTheme.primaryColor)),
+                              Text('/${stats.maxReferrals}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text('Lượt mời còn lại', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 13)),
+                          const SizedBox(height: 2),
+                          Text('${stats.remainingReferrals}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: AppTheme.lightTheme.primaryColor)),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 24),
                 // Người đã mời
                 Text('Người dùng bạn đã mời', style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
                 const SizedBox(height: 10),
-                Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 1,
-                  margin: EdgeInsets.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                    child: Column(
-                      children: [
-                        if (totalInvited == 0)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text('Chưa có ai được mời', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
-                          )
-                        else ...[
-                          ...pagedUsers.map((user) => Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                            decoration: BoxDecoration(
-                              color: AppTheme.lightTheme.cardTheme.color,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppTheme.lightTheme.primaryColor.withOpacity(0.10)),
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 16,
-                                  backgroundColor: AppTheme.lightTheme.primaryColor.withOpacity(0.15),
-                                  child: Icon(Icons.person, color: AppTheme.lightTheme.primaryColor, size: 20),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(child: Text(user.username, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15))),
-                                Text('Tham gia ${_formatDate(user.joinedAt)}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
-                              ],
-                            ),
-                          )),
-                          if (totalPages > 1)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.chevron_left, color: Colors.white70),
-                                    onPressed: _currentPage > 0
-                                        ? () => setState(() => _currentPage--)
-                                        : null,
-                                  ),
-                                  Text('Trang ${_currentPage + 1}/$totalPages', style: TextStyle(color: AppTheme.secondaryTextColor)),
-                                  IconButton(
-                                    icon: const Icon(Icons.chevron_right, color: Colors.white70),
-                                    onPressed: _currentPage < totalPages - 1
-                                        ? () => setState(() => _currentPage++)
-                                        : null,
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ],
-                    ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 6,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 24),
-                // Người đã mời bạn
-                Text('Người đã mời bạn', style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
-                const SizedBox(height: 10),
-                Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 1,
-                  margin: EdgeInsets.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
-                    child: stats.whoReferredMe != null
-                        ? Row(
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                  child: Column(
+                    children: [
+                      if (totalInvited == 0)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Text('Chưa có ai được mời', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
+                        )
+                      else ...[
+                        ...pagedUsers.map((user) => Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                          ),
+                          child: Row(
                             children: [
                               CircleAvatar(
                                 radius: 16,
@@ -219,53 +185,119 @@ class _ReferralScreenState extends State<ReferralScreen> {
                                 child: Icon(Icons.person, color: AppTheme.lightTheme.primaryColor, size: 20),
                               ),
                               const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(stats.whoReferredMe!.username, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-                                    Text('Mã giới thiệu: ${stats.whoReferredMe!.referralCode}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
-                                  ],
-                                ),
-                              ),
+                              Expanded(child: Text(user.username, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15))),
+                              Text('Tham gia ${_formatDate(user.joinedAt)}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
                             ],
-                          )
-                        : Text('Chưa có ai mời bạn', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
+                          ),
+                        )),
+                        if (totalPages > 1)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.chevron_left, color: Colors.black45),
+                                  onPressed: _currentPage > 0
+                                      ? () => setState(() => _currentPage--)
+                                      : null,
+                                ),
+                                Text('Trang ${_currentPage + 1}/$totalPages', style: TextStyle(color: AppTheme.secondaryTextColor)),
+                                IconButton(
+                                  icon: const Icon(Icons.chevron_right, color: Colors.black45),
+                                  onPressed: _currentPage < totalPages - 1
+                                      ? () => setState(() => _currentPage++)
+                                      : null,
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ],
                   ),
+                ),
+                const SizedBox(height: 24),
+                // Người đã mời bạn
+                Text('Người đã mời bạn', style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                const SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 6,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  margin: EdgeInsets.zero,
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
+                  child: stats.whoReferredMe != null
+                      ? Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundColor: AppTheme.lightTheme.primaryColor.withOpacity(0.15),
+                              child: Icon(Icons.person, color: AppTheme.lightTheme.primaryColor, size: 20),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(stats.whoReferredMe!.username, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15)),
+                                  Text('Mã giới thiệu: ${stats.whoReferredMe!.referralCode}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text('Chưa có ai mời bạn', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
                 ),
                 const SizedBox(height: 24),
                 // Vòng tròn bảo mật
                 Text('Vòng tròn bảo mật', style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
                 const SizedBox(height: 10),
-                Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 1,
-                  margin: EdgeInsets.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
-                    child: stats.securityCircles.isNotEmpty
-                        ? Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 16,
-                                backgroundColor: AppTheme.lightTheme.primaryColor.withOpacity(0.15),
-                                child: Icon(Icons.verified_user, color: AppTheme.lightTheme.primaryColor, size: 20),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(stats.securityCircles.first.username, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-                                    Text('Mã giới thiệu: ${stats.securityCircles.first.referralCode}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
-                                    Text('Tham gia: ${_formatDate(stats.securityCircles.first.joinedAt)}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          )
-                        : Text('Bạn chưa có vòng tròn bảo mật', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 6,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
+                  margin: EdgeInsets.zero,
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
+                  child: stats.securityCircles.isNotEmpty
+                      ? Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundColor: AppTheme.lightTheme.primaryColor.withOpacity(0.15),
+                              child: Icon(Icons.verified_user, color: AppTheme.lightTheme.primaryColor, size: 20),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(stats.securityCircles.first.username, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15)),
+                                  Text('Mã giới thiệu: ${stats.securityCircles.first.referralCode}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
+                                  Text('Tham gia: ${_formatDate(stats.securityCircles.first.joinedAt)}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text('Bạn chưa có vòng tròn bảo mật', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -280,36 +312,44 @@ class _ReferralScreenState extends State<ReferralScreen> {
                   builder: (context) {
                     final profileProvider = Provider.of<ProfileProvider>(context);
                     final referralCode = profileProvider.userInfo?['referralCode'] ?? '';
-                    return Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 1,
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 6,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
                       margin: EdgeInsets.zero,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(referralCode, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1.2, fontSize: 16)),
-                            ),
-                            InkWell(
-                              borderRadius: BorderRadius.circular(8),
-                              onTap: () async {
-                                if (referralCode.toString().isNotEmpty) {
-                                  await Clipboard.setData(ClipboardData(text: referralCode.toString()));
-                                  ErrorUtils.showSuccessToast(context, 'Đã copy mã giới thiệu!');
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.lightTheme.primaryColor.withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(Icons.copy, color: Colors.white70, size: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(referralCode, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, letterSpacing: 1.2, fontSize: 16)),
+                          ),
+                          InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: () async {
+                              if (referralCode.toString().isNotEmpty) {
+                                await Clipboard.setData(ClipboardData(text: referralCode.toString()));
+                                ErrorUtils.showSuccessToast(context, 'Đã copy mã giới thiệu!');
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: AppTheme.lightTheme.primaryColor.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(8),
                               ),
+                              child: const Icon(Icons.copy, color: Colors.black54, size: 20),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -321,16 +361,24 @@ class _ReferralScreenState extends State<ReferralScreen> {
                 Text('Nhập mã giới thiệu', style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
                 const SizedBox(height: 10),
                 if (stats.whoReferredMe != null)
-                  Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 1,
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 6,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
                     margin: EdgeInsets.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
-                      child: Text(
-                        'Bạn đã nhập mã giới thiệu, chỉ được nhập 1 lần duy nhất!',
-                        style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14),
-                      ),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
+                    child: Text(
+                      'Bạn đã nhập mã giới thiệu, chỉ được nhập 1 lần duy nhất!',
+                      style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14),
                     ),
                   )
                 else

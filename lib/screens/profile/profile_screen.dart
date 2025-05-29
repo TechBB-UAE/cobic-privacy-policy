@@ -63,11 +63,11 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: CustomAppBar(
         titleText: 'Cá nhân',
-        backgroundColor: AppTheme.lightTheme.appBarTheme.backgroundColor,
-        iconColor: Colors.white,
+        backgroundColor: Colors.white,
+        iconColor: AppTheme.textColor,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.home, color: Colors.white),
+          icon: const Icon(Icons.home, color: AppTheme.textColor),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
               MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -77,7 +77,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+            icon: const Icon(Icons.qr_code_scanner, color: AppTheme.textColor),
             onPressed: () async {
               await Navigator.of(context, rootNavigator: true).push(
                 MaterialPageRoute(builder: (_) => const ScanQrScreen(targetRoute: '/home')),
@@ -110,9 +110,14 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Card(
-              color: AppTheme.lightTheme.cardTheme.color,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              color: Colors.white,
+              surfaceTintColor: Colors.white,
+              shadowColor: Colors.black12,
               elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: Colors.white, width: 1),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -169,6 +174,14 @@ class ProfileScreen extends StatelessWidget {
             ),
             Card(
               margin: const EdgeInsets.only(top: 24, bottom: 12),
+              color: Colors.white,
+              surfaceTintColor: Colors.white,
+              shadowColor: Colors.black12,
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: Colors.white, width: 1),
+              ),
               child: Column(
                 children: [
                   ListTile(
@@ -244,7 +257,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         content: const Text(
           'Bạn có chắc chắn muốn đăng xuất không?',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: AppTheme.textColor),
         ),
         actions: [
           TextButton(
@@ -294,7 +307,7 @@ class ProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.deepPurple),
+          Icon(icon, size: 20, color: AppTheme.lightTheme.primaryColor),
           const SizedBox(width: 12),
           Expanded(
             flex: 2,

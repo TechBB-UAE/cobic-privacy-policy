@@ -124,21 +124,21 @@ class _MainTabScreenState extends State<MainTabScreen> {
         ),
         bottomNavigationBar: Theme(
           data: Theme.of(context).copyWith(
-            canvasColor: AppTheme.lightTheme.appBarTheme.backgroundColor,
-            primaryColor: AppTheme.lightTheme.primaryColor,
-            textTheme: Theme.of(context).textTheme.copyWith(
-              bodySmall: const TextStyle(color: Colors.white),
-            ),
+            canvasColor: Colors.white,
+            // Nếu dùng Material 3, có thể thêm:
+            // colorScheme: Theme.of(context).colorScheme.copyWith(surface: Colors.white, surfaceTint: Colors.white),
           ),
           child: BottomNavigationBar(
+            backgroundColor: Colors.white,
+            // Nếu có thuộc tính surfaceTintColor, thêm:
+            // surfaceTintColor: Colors.white,
             currentIndex: _currentIndex,
             onTap: (index) => setState(() => _currentIndex = index),
             type: BottomNavigationBarType.fixed,
-            backgroundColor: AppTheme.lightTheme.appBarTheme.backgroundColor,
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white70,
-            selectedIconTheme: const IconThemeData(color: Colors.white),
-            unselectedIconTheme: const IconThemeData(color: Colors.white70),
+            selectedItemColor: const Color(0xFF0066cc),
+            unselectedItemColor: AppTheme.textColor.withOpacity(0.6),
+            selectedIconTheme: const IconThemeData(color: Color(0xFF0066cc)),
+            unselectedIconTheme: IconThemeData(color: AppTheme.textColor.withOpacity(0.6)),
             items: const [
               BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Cá nhân'),
               BottomNavigationBarItem(icon: Icon(Icons.assignment), label: 'Nhiệm vụ'),

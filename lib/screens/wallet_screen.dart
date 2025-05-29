@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cobic/theme/app_theme.dart';
+import 'package:cobic/theme/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:cobic/providers/profile_provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -144,20 +145,20 @@ class _WalletScreenState extends State<WalletScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Ví'),
+      appBar: CustomAppBar(
+        titleText: 'Ví',
+        backgroundColor: Colors.white,
+        iconColor: AppTheme.textColor,
         centerTitle: true,
-        backgroundColor: AppTheme.lightTheme.appBarTheme.backgroundColor,
-        iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
-          icon: const Icon(Icons.home, color: Colors.white),
+          icon: const Icon(Icons.home, color: AppTheme.textColor),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/home', (route) => false);
           },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+            icon: const Icon(Icons.qr_code_scanner, color: AppTheme.textColor),
             onPressed: () async {
               await Navigator.of(context, rootNavigator: true).push(
                 MaterialPageRoute(builder: (_) => const ScanQrScreen(targetRoute: '/home')),
@@ -174,8 +175,16 @@ class _WalletScreenState extends State<WalletScreen> {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
               decoration: BoxDecoration(
-                color: AppTheme.lightTheme.primaryColor.withOpacity(0.15),
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
@@ -258,7 +267,12 @@ class _WalletScreenState extends State<WalletScreen> {
                 children: [
                   Row(
                     children: [
-                      Expanded(child: Text('Lịch sử giao dịch', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18))),
+                      Expanded(
+                        child: Text(
+                          'Lịch sử giao dịch',
+                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -277,55 +291,57 @@ class _WalletScreenState extends State<WalletScreen> {
                       padding: EdgeInsets.symmetric(vertical: 32),
                       child: Center(child: Text('Chưa có giao dịch nào', style: TextStyle(color: Colors.white70))),
                     )
-                  else ...pagedTransactions.map((item) => Card(
-                        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                        elevation: 2,
-                        color: AppTheme.lightTheme.scaffoldBackgroundColor,
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 18),
-                          leading: Icon(
-                            item['type'] == 'transfer' ? Icons.arrow_upward : Icons.arrow_downward,
-                            color: item['type'] == 'transfer' ? Colors.red : Colors.green,
-                            size: 28,
+                  else ...pagedTransactions.map((item) => Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 18),
+                      leading: Icon(
+                        item['type'] == 'transfer' ? Icons.arrow_upward : Icons.arrow_downward,
+                        color: item['type'] == 'transfer' ? Colors.red : Colors.green,
+                        size: 28,
+                      ),
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item['type'] ?? '',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  item['type'] ?? '',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Text(
-                                (item['type'] == 'transfer' ? '-' : '+') + (double.tryParse(item['amount']?.toString() ?? '0')?.toStringAsFixed(2) ?? '0.00') + ' Cobic',
-                                style: TextStyle(
-                                  color: item['type'] == 'transfer' ? Colors.red : Colors.green,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            (item['type'] == 'transfer' ? '-' : '+') + (double.tryParse(item['amount']?.toString() ?? '0')?.toStringAsFixed(2) ?? '0.00') + ' Cobic',
+                            style: TextStyle(
+                              color: item['type'] == 'transfer' ? Colors.red : Colors.green,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 4),
-                              Text(
-                                item['description'] ?? '',
-                                style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                item['timestamp'] != null ? item['timestamp'].toString() : '',
-                                style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 13),
-                              ),
-                            ],
+                        ],
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text(
+                            item['description'] ?? '',
+                            style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14),
                           ),
-                        ),
-                      )),
+                          const SizedBox(height: 2),
+                          Text(
+                            item['timestamp'] != null ? item['timestamp'].toString() : '',
+                            style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

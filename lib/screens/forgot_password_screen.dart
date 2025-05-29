@@ -68,8 +68,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quên mật khẩu'),
-        backgroundColor: AppTheme.lightTheme.appBarTheme.backgroundColor,
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -79,7 +79,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.lock_reset, size: 60, color: Colors.deepPurple),
+                Icon(Icons.lock_reset, size: 60, color: AppTheme.primaryColor),
                 const SizedBox(height: 18),
                 const Text('Nhập email đã đăng ký để nhận hướng dẫn đặt lại mật khẩu.',
                   style: TextStyle(fontSize: 15), textAlign: TextAlign.center),

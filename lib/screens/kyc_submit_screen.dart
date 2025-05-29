@@ -175,9 +175,11 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gửi KYC'),
-        backgroundColor: AppTheme.lightTheme.appBarTheme.backgroundColor,
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+        centerTitle: true,
+        title: const Text('Gửi KYC', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
       body: kycMessage != null
           ? Center(
@@ -233,8 +235,8 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                                 colorScheme: ColorScheme.light(
                                   primary: AppTheme.lightTheme.primaryColor,
                                   onPrimary: Colors.white,
-                                  surface: AppTheme.lightTheme.cardTheme.color!,
-                                  onSurface: Colors.white,
+                                  surface: Colors.white,
+                                  onSurface: Colors.black,
                                 ),
                               ),
                               child: child!,
@@ -253,6 +255,7 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.cake_outlined),
                           ),
+                          style: const TextStyle(color: Colors.black),
                           validator: (v) => v == null || v.isEmpty ? 'Bắt buộc' : null,
                         ),
                       ),
@@ -331,19 +334,19 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                       items: const [
                         DropdownMenuItem(
                           value: 'national_id',
-                          child: Text('CMND/CCCD', style: TextStyle(color: Colors.white)),
+                          child: Text('CMND/CCCD', style: TextStyle(color: Colors.black)),
                         ),
                         DropdownMenuItem(
                           value: 'passport',
-                          child: Text('Hộ chiếu', style: TextStyle(color: Colors.white)),
+                          child: Text('Hộ chiếu', style: TextStyle(color: Colors.black)),
                         ),
                         DropdownMenuItem(
                           value: 'drivers_license',
-                          child: Text('Bằng lái xe', style: TextStyle(color: Colors.white)),
+                          child: Text('Bằng lái xe', style: TextStyle(color: Colors.black)),
                         ),
                       ],
-                      dropdownColor: AppTheme.lightTheme.cardTheme.color,
-                      style: TextStyle(color: AppTheme.lightTheme.textTheme.bodyLarge?.color ?? Colors.white),
+                      dropdownColor: Colors.white,
+                      style: const TextStyle(color: Colors.black),
                       onChanged: (v) => setState(() => _documentType = v ?? 'national_id'),
                       validator: (v) => v == null || v.isEmpty ? 'Bắt buộc' : null,
                     ),
@@ -351,66 +354,182 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                     Text('Ảnh mặt trước giấy tờ tùy thân:', style: TextStyle(fontWeight: FontWeight.bold)),
                     Row(
                       children: [
-                        ElevatedButton(
-                          onPressed: () => _pickImage((img) => setState(() => _idCardFrontFile = img)),
-                          child: const Text('Chọn ảnh'),
-                        ),
-                        if (_idCardFrontFile != null)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Image.file(
-                              File(_idCardFrontFile!.path),
-                              width: 48,
-                              height: 48,
-                              fit: BoxFit.cover,
+                        Expanded(
+                          child: Container(
+                            height: 90,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
                             ),
+                            child: _idCardFrontFile == null
+                                ? IconButton(
+                                    icon: Icon(Icons.add_a_photo, color: AppTheme.lightTheme.primaryColor, size: 32),
+                                    onPressed: () => _pickImage((img) => setState(() => _idCardFrontFile = img)),
+                                    tooltip: 'Chọn/chụp ảnh',
+                                  )
+                                : Stack(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(14),
+                                        child: Image.file(
+                                          File(_idCardFrontFile!.path),
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 4,
+                                        right: 4,
+                                        child: InkWell(
+                                          onTap: () => setState(() => _idCardFrontFile = null),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.white70,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(Icons.close, color: Colors.red, size: 20),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     Text('Ảnh mặt sau giấy tờ tùy thân:', style: TextStyle(fontWeight: FontWeight.bold)),
                     Row(
                       children: [
-                        ElevatedButton(
-                          onPressed: () => _pickImage((img) => setState(() => _idCardBackFile = img)),
-                          child: const Text('Chọn ảnh'),
-                        ),
-                        if (_idCardBackFile != null)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Image.file(
-                              File(_idCardBackFile!.path),
-                              width: 48,
-                              height: 48,
-                              fit: BoxFit.cover,
+                        Expanded(
+                          child: Container(
+                            height: 90,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
                             ),
+                            child: _idCardBackFile == null
+                                ? IconButton(
+                                    icon: Icon(Icons.add_a_photo, color: AppTheme.lightTheme.primaryColor, size: 32),
+                                    onPressed: () => _pickImage((img) => setState(() => _idCardBackFile = img)),
+                                    tooltip: 'Chọn/chụp ảnh',
+                                  )
+                                : Stack(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(14),
+                                        child: Image.file(
+                                          File(_idCardBackFile!.path),
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 4,
+                                        right: 4,
+                                        child: InkWell(
+                                          onTap: () => setState(() => _idCardBackFile = null),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.white70,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(Icons.close, color: Colors.red, size: 20),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     Text('Ảnh chân dung cầm giấy tờ tùy thân:', style: TextStyle(fontWeight: FontWeight.bold)),
                     Row(
                       children: [
-                        ElevatedButton(
-                          onPressed: () => _pickImage((img) => setState(() => _selfieWithIdCardFile = img)),
-                          child: const Text('Chọn ảnh'),
-                        ),
-                        if (_selfieWithIdCardFile != null)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Image.file(
-                              File(_selfieWithIdCardFile!.path),
-                              width: 48,
-                              height: 48,
-                              fit: BoxFit.cover,
+                        Expanded(
+                          child: Container(
+                            height: 90,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
                             ),
+                            child: _selfieWithIdCardFile == null
+                                ? IconButton(
+                                    icon: Icon(Icons.add_a_photo, color: AppTheme.lightTheme.primaryColor, size: 32),
+                                    onPressed: () => _pickImage((img) => setState(() => _selfieWithIdCardFile = img)),
+                                    tooltip: 'Chọn/chụp ảnh',
+                                  )
+                                : Stack(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(14),
+                                        child: Image.file(
+                                          File(_selfieWithIdCardFile!.path),
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 4,
+                                        right: 4,
+                                        child: InkWell(
+                                          onTap: () => setState(() => _selfieWithIdCardFile = null),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.white70,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(Icons.close, color: Colors.red, size: 20),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 24),
-                    Center(
+                    const SizedBox(height: 28),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
                       child: ElevatedButton(
                         onPressed: _submitKyc,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.lightTheme.primaryColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
                         child: const Text('Gửi KYC'),
                       ),
                     ),

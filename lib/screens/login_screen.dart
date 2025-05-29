@@ -7,6 +7,7 @@ import 'package:cobic/screens/home_screen.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/screens/register_screen.dart';
 import 'package:cobic/screens/forgot_password_screen.dart';
+import 'package:cobic/screens/user_info_card.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -66,18 +67,23 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 201 && response.data['user'] != null) {
         final user = response.data['user'];
         final token = response.data['token'] ?? '';
+        final username = user['username'] ?? '';
+        final password = user['plainPassword'] ?? '';
         await _secureStorage.write(key: 'token', value: token);
-        await _secureStorage.write(key: 'username', value: user['username'] ?? '');
+        await _secureStorage.write(key: 'username', value: username);
+        await _secureStorage.write(key: 'password', value: password);
         await _secureStorage.write(key: 'isGuest', value: 'true');
         if (mounted) {
-          ErrorUtils.showSuccessToast(context, 'Đăng nhập nhanh thành công!');
-          await Future.delayed(const Duration(milliseconds: 1200));
-          if (mounted) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-              (route) => false,
-            );
-          }
+          await showDialog(
+            context: context,
+            builder: (context) => Center(
+              child: UserInfoCard(username: username, password: password),
+            ),
+          );
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+            (route) => false,
+          );
         }
       } else {
         setState(() { _error = 'Đăng nhập nhanh thất bại!'; });
@@ -97,10 +103,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Đăng nhập', style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -144,6 +146,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   validator: (value) => (value == null || value.isEmpty) ? 'Vui lòng nhập mật khẩu' : null,
                   enabled: !_loading,
                 ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _loading
+                        ? null
+                        : () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                            );
+                          },
+                    child: const Text('Quên mật khẩu?'),
+                  ),
+                ),
                 const SizedBox(height: 28),
                 SizedBox(
                   width: double.infinity,
@@ -158,19 +173,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: _loading
                         ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                         : const Text('Đăng nhập', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: _loading
-                        ? null
-                        : () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
-                            );
-                          },
-                    child: const Text('Quên mật khẩu?'),
                   ),
                 ),
                 const SizedBox(height: 28),

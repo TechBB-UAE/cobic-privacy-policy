@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cobic/theme/app_theme.dart';
+import 'package:cobic/theme/custom_app_bar.dart';
 import 'task_submit_screen.dart';
 import 'package:cobic/services/task_service.dart';
 import 'package:cobic/utils/error_utils.dart';
@@ -44,20 +45,20 @@ class _TaskListScreenState extends State<TaskListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Danh sách nhiệm vụ'),
+      appBar: CustomAppBar(
+        titleText: 'Danh sách nhiệm vụ',
+        backgroundColor: Colors.white,
+        iconColor: AppTheme.textColor,
         centerTitle: true,
-        backgroundColor: AppTheme.lightTheme.appBarTheme.backgroundColor,
-        iconTheme: const IconThemeData(color: Colors.white),
         leading: IconButton(
-          icon: const Icon(Icons.home, color: Colors.white),
+          icon: const Icon(Icons.home, color: AppTheme.textColor),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/home', (route) => false);
           },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+            icon: const Icon(Icons.qr_code_scanner, color: AppTheme.textColor),
             onPressed: () async {
               await Navigator.of(context, rootNavigator: true).push(
                 MaterialPageRoute(builder: (_) => const ScanQrScreen(targetRoute: '/home')),
@@ -160,9 +161,19 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       );
                     }
 
-                    return Card(
-                      color: AppTheme.lightTheme.cardTheme.color,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.withOpacity(0.13)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            blurRadius: 8,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
                       child: ListTile(
                         leading: Icon(
                           !hasSubmission 
