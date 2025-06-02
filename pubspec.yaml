@@ -46,6 +46,7 @@ dependencies:
   intl: ^0.18.1
   image: ^4.1.7
   flutter_image_compress: ^2.1.0
+  audioplayers: ^5.2.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -107,6 +108,7 @@ flutter:
   # Cấu hình assets
   assets:
     - assets/images/
+    - assets/sounds/ting.mp3
 
 flutter_icons:
   android: true

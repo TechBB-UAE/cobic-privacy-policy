@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 class ApiService {
   static const String baseUrl = 'https://app.cobic.io/api';
-  static const String apiKey = 'b11537dd2566d197aab6d8c0a3051a48'; // Thay bằng API KEY thực tế
+  static const String apiKey = '3cc1e10f892dad8eb2c612abf6262c09'; // Thay bằng API KEY thực tế
 
   static final Dio _dio = Dio(
     BaseOptions(

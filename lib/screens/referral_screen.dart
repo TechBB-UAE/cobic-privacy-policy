@@ -415,7 +415,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                               ErrorUtils.showSuccessToast(context, 'Nhập mã giới thiệu thành công!');
                               _referralCodeController.clear();
                               // Cập nhật lại profile
-                              await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo();
+                              await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo(context);
                               // Thêm delay để backend kịp cập nhật
                               await Future.delayed(const Duration(milliseconds: 1000));
                               // Cập nhật lại referral stats

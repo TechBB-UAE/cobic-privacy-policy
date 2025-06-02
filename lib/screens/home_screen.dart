@@ -58,8 +58,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _startCountdownTimer() {
     _countdownTimer?.cancel();
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (mounted) {
+        final mining = Provider.of<MiningProvider>(context, listen: false);
+        if (mining.nextMiningTime != null) {
+          final now = DateTime.now().toUtc();
+          final diff = mining.nextMiningTime!.difference(now);
+          if (diff.isNegative || diff.inSeconds <= 0) {
+            timer.cancel();
+            // Gọi lại fetchMiningStatus để cập nhật trạng thái mining
+            final token = await _secureStorage.read(key: 'token');
+            if (token != null) {
+              await mining.fetchMiningStatus(token);
+            }
+            setState(() {});
+            return;
+          }
+        }
         setState(() {});
       }
     });
@@ -70,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _username = await _secureStorage.read(key: 'username');
     if (_token != null) {
       // Auto fetch user info khi đã có token
-      Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo();
+      Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo(context);
     } else {
       final miningProvider = Provider.of<MiningProvider>(context, listen: false);
       miningProvider.reset();
@@ -122,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
       await mining.dailyCheckIn(token);
       if (mounted) {
         ErrorUtils.showSuccessToast(context, 'Khai thác thành công! Nhận được ${mining.reward ?? '0.00'} COBIC. Số dư mới: ${mining.newBalance ?? '0.00'} COBIC');
-        await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo();
+        await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo(context);
       }
     }
   }
@@ -354,24 +369,24 @@ class _UserMenuButtonState extends State<_UserMenuButton> {
               left: offset.dx + size.width - 180,
               child: Material(
                 color: Colors.transparent,
-                child: Container(
+              child: Container(
                   width: 180,
                   padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 0),
-                  decoration: BoxDecoration(
+                decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.grey.shade300, width: 1.2),
-                    boxShadow: [
-                      BoxShadow(
+                  boxShadow: [
+                    BoxShadow(
                         color: Colors.black.withOpacity(0.08),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                       GestureDetector(
                         onTap: () {
                           _hideMenu();
@@ -381,14 +396,14 @@ class _UserMenuButtonState extends State<_UserMenuButton> {
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Text(
                             'Trang cá nhân',
-                            style: TextStyle(
+                      style: TextStyle(
                               color: AppTheme.textColor,
-                              fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                               fontSize: 18,
                             ),
                           ),
-                        ),
                       ),
+                    ),
                       const SizedBox(height: 6),
                       GestureDetector(
                         onTap: () {
@@ -401,13 +416,13 @@ class _UserMenuButtonState extends State<_UserMenuButton> {
                             'Đăng xuất',
                             style: TextStyle(
                               color: Colors.red,
-                              fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                               fontSize: 18,
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                    ),
+                  ],
                   ),
                 ),
               ),

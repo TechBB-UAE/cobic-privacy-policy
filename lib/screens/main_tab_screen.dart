@@ -88,18 +88,6 @@ class _MainTabScreenState extends State<MainTabScreen> {
               key: _navigatorKeys[2],
               onGenerateRoute: (settings) => MaterialPageRoute(
                 builder: (context) => MiningScreen(
-                  miningRate: double.tryParse(profileProvider.miningRate) ?? 0.0,
-                  miningStatus: miningProvider.canMine ? 'Sẵn sàng đào!' : 'Đang đếm ngược...',
-                  dailyCheckinStatus: miningProvider.canMine ? 'Cần điểm danh' : 'Đã điểm danh',
-                  canMine: miningProvider.canMine,
-                  nextMiningTime: miningProvider.nextMiningTime,
-                  onMine: miningProvider.canMine ? () async {
-                    final token = await const FlutterSecureStorage().read(key: 'token');
-                    if (token != null) {
-                      await miningProvider.dailyCheckIn(token);
-                      await profileProvider.fetchUserInfo();
-                    }
-                  } : null,
                   onScanQR: () async {
                     await Navigator.of(context, rootNavigator: true).push(
                       MaterialPageRoute(builder: (_) => const ScanQrScreen(targetRoute: '/home')),

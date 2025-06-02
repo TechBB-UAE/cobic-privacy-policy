@@ -4,6 +4,7 @@ import 'package:cobic/services/point_service.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:cobic/providers/profile_provider.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class ScanQrScreen extends StatefulWidget {
   final String? targetRoute;
@@ -18,6 +19,22 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
   QRViewController? controller;
   bool _isProcessing = false;
   bool _isPopped = false;
+  final AudioPlayer player = AudioPlayer();
+
+  @override
+  void initState() {
+    super.initState();
+    _initAudio();
+  }
+
+  Future<void> _initAudio() async {
+    try {
+      await player.setSource(AssetSource('sounds/ting.mp3'));
+      await player.setVolume(1.0);
+    } catch (e) {
+      print('Lỗi khởi tạo âm thanh: $e');
+    }
+  }
 
   @override
   void reassemble() {
@@ -33,19 +50,28 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
     ctrl.scannedDataStream.listen((scanData) async {
       if (_isProcessing || _isPopped) return;
       setState(() => _isProcessing = true);
-      print('Đã quét: \\${scanData.code}');
+      print('Đã quét: ${scanData.code}');
       try {
         await controller?.pauseCamera();
         final res = await PointService.scanQrAndCollectPoint(scanData.code ?? '').timeout(const Duration(seconds: 10));
-        print('API trả về: \\${res}');
+        print('API trả về: $res');
         if (mounted && !_isPopped) {
           _isPopped = true;
           ErrorUtils.showSuccessToast(context, res['message'] ?? 'Tích điểm thành công!');
+          
+          // Phát âm thanh
+          try {
+            await player.play(AssetSource('sounds/ting.mp3'));
+            print('Đã phát âm thanh');
+          } catch (e) {
+            print('Lỗi phát âm thanh: $e');
+          }
+
           await Future.delayed(const Duration(milliseconds: 1200));
           if (!mounted) return;
           // Gọi lại API lấy profile để cập nhật số dư
           try {
-            await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo();
+            await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo(context);
           } catch (e) {
             if (mounted) {
               ErrorUtils.showErrorToast(context, ErrorUtils.parseApiError(e));
@@ -54,7 +80,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
           Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
         }
       } catch (e) {
-        print('Lỗi khi quét QR: \\${e}');
+        print('Lỗi khi quét QR: $e');
         if (mounted && !_isPopped) {
           _isPopped = true;
           ErrorUtils.showErrorToast(context, ErrorUtils.parseApiError(e));
@@ -69,6 +95,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
   @override
   void dispose() {
     controller?.dispose();
+    player.dispose();
     super.dispose();
   }
 

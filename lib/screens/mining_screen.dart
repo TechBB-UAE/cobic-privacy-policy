@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cobic/theme/app_theme.dart';
 import 'package:cobic/theme/custom_app_bar.dart';
 import 'package:cobic/screens/home_screen.dart';
-import 'package:cobic/screens/profile_screen.dart';
 import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:cobic/providers/mining_provider.dart';
@@ -11,54 +10,68 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:cobic/utils/error_utils.dart';
 
 class MiningScreen extends StatefulWidget {
-  final double miningRate;
-  final String miningStatus;
-  final String dailyCheckinStatus;
-  final bool canMine;
-  final DateTime? nextMiningTime;
-  final VoidCallback? onMine;
   final VoidCallback? onScanQR;
-
-  const MiningScreen({
-    super.key,
-    this.miningRate = 0.95,
-    this.miningStatus = 'Sẵn sàng đào!',
-    this.dailyCheckinStatus = 'Cần điểm danh',
-    this.canMine = true,
-    this.nextMiningTime,
-    this.onMine,
-    this.onScanQR,
-  });
+  const MiningScreen({super.key, this.onScanQR});
 
   @override
   State<MiningScreen> createState() => _MiningScreenState();
 }
 
 class _MiningScreenState extends State<MiningScreen> {
-  late Timer _timer;
+  Timer? _timer;
   Duration _countdown = Duration.zero;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initMiningStatus());
+  }
+
+  Future<void> _initMiningStatus() async {
+    final token = await _secureStorage.read(key: 'token');
+    if (token != null) {
+      await Provider.of<MiningProvider>(context, listen: false).fetchMiningStatus(token);
+      _startCountdown();
+    }
+  }
+
+  void _startCountdown() {
+    _timer?.cancel();
     _updateCountdown();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => _updateCountdown());
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
-  void _updateCountdown() {
-    if (widget.nextMiningTime != null) {
+  void _updateCountdown() async {
+    final miningProvider = Provider.of<MiningProvider>(context, listen: false);
+    final nextMiningTime = miningProvider.nextMiningTime;
+    if (nextMiningTime != null) {
       final now = DateTime.now().toUtc();
-      final diff = widget.nextMiningTime!.difference(now);
-      setState(() {
-        _countdown = diff.isNegative ? Duration.zero : diff;
-      });
+      final diff = nextMiningTime.difference(now);
+      if (diff.isNegative || diff.inSeconds <= 0) {
+        setState(() {
+          _countdown = Duration.zero;
+        });
+        _timer?.cancel();
+        // Gọi lại fetchMiningStatus để cập nhật trạng thái mining
+        final token = await _secureStorage.read(key: 'token');
+        if (token != null) {
+          await miningProvider.fetchMiningStatus(token);
+          if (miningProvider.canMine) {
+            setState(() {});
+          }
+        }
+      } else {
+        setState(() {
+          _countdown = diff;
+        });
+      }
     } else {
       setState(() {
         _countdown = Duration.zero;
@@ -73,19 +86,12 @@ class _MiningScreenState extends State<MiningScreen> {
     return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
-  double _progressPercent() {
-    if (widget.nextMiningTime == null) return 0.0;
+  double _progressPercent(DateTime? nextMiningTime) {
+    if (nextMiningTime == null) return 0.0;
     final now = DateTime.now().toUtc();
     final total = const Duration(hours: 24);
-    final diff = widget.nextMiningTime!.difference(now);
+    final diff = nextMiningTime.difference(now);
     return (diff.isNegative ? 0.0 : diff.inSeconds / total.inSeconds).clamp(0.0, 1.0);
-  }
-
-  void _navigateToHome() {
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      '/home',
-      (route) => false,
-    );
   }
 
   Future<void> _handleMining() async {
@@ -95,13 +101,19 @@ class _MiningScreenState extends State<MiningScreen> {
       await miningProvider.dailyCheckIn(token);
       if (mounted) {
         ErrorUtils.showSuccessToast(context, 'Khai thác thành công! Nhận được ${miningProvider.reward ?? '0.00'} COBIC. Số dư mới: ${miningProvider.newBalance ?? '0.00'} COBIC');
-        await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo();
+        await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo(context);
+        _startCountdown();
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final miningProvider = Provider.of<MiningProvider>(context);
+    final canMine = miningProvider.canMine;
+    final nextMiningTime = miningProvider.nextMiningTime;
+    final miningRate = double.tryParse(miningProvider.miningRate ?? '0.0') ?? 0.0;
+
     return Scaffold(
       appBar: CustomAppBar(
         titleText: 'Khai thác',
@@ -147,12 +159,12 @@ class _MiningScreenState extends State<MiningScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      widget.miningRate.toStringAsFixed(4),
+                      miningRate.toStringAsFixed(4),
                       style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                            color: AppTheme.textColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 32,
-                          ),
+                        color: AppTheme.textColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 32,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Padding(
@@ -209,14 +221,14 @@ class _MiningScreenState extends State<MiningScreen> {
                                 return AppTheme.lightTheme.primaryColor;
                               }),
                             ),
-                            onPressed: widget.canMine ? _handleMining : null,
-                            icon: Icon(Icons.bolt, size: 22, color: widget.canMine ? Colors.white : AppTheme.textColor),
+                            onPressed: canMine ? _handleMining : null,
+                            icon: Icon(Icons.bolt, size: 22, color: canMine ? Colors.white : AppTheme.textColor),
                             label: Text(
                               'bắt đầu khai thác ngay',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: widget.canMine ? Colors.white : AppTheme.textColor,
+                                color: canMine ? Colors.white : AppTheme.textColor,
                               ),
                             ),
                           ),
@@ -228,16 +240,16 @@ class _MiningScreenState extends State<MiningScreen> {
                           children: [
                             Text('Đào tiếp theo', style: TextStyle(color: AppTheme.secondaryTextColor)),
                             Text(
-                              widget.canMine
+                              canMine
                                 ? 'Sẵn sàng đào!'
-                                : (widget.nextMiningTime != null ? 'Đang đếm ngược... (${_formatCountdown(_countdown)})' : 'Đang đếm ngược...'),
+                                : (nextMiningTime != null ? 'Đang đếm ngược... (${_formatCountdown(_countdown)})' : 'Đang đếm ngược...'),
                               style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.lightTheme.primaryColor),
                             ),
                           ],
                         ),
                         const SizedBox(height: 4),
                         LinearProgressIndicator(
-                          value: _progressPercent(),
+                          value: _progressPercent(nextMiningTime),
                           minHeight: 6,
                           backgroundColor: Colors.deepPurple.shade100,
                           valueColor: AlwaysStoppedAnimation<Color>(AppTheme.lightTheme.primaryColor!),

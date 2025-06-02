@@ -180,16 +180,16 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
         return;
       }
 
-      // Gọi lại API lấy user info mới nhất
-      await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo();
-      if (mounted) {
+        // Gọi lại API lấy user info mới nhất
+        await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo(context);
+        if (mounted) {
         ErrorUtils.showSuccessToast(context, 'Cập nhật hồ sơ thành công!');
-        await Future.delayed(const Duration(milliseconds: 1200));
-        if (widget.navigatorKey != null) {
-          widget.navigatorKey!.currentState?.popUntil((route) => route.settings.name == '/profile');
-        } else {
-          Navigator.of(context).pop();
-        }
+          await Future.delayed(const Duration(milliseconds: 1200));
+          if (widget.navigatorKey != null) {
+            widget.navigatorKey!.currentState?.popUntil((route) => route.settings.name == '/profile');
+          } else {
+            Navigator.of(context).pop();
+          }
       }
     } catch (e) {
       setState(() {
@@ -346,7 +346,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                   const Padding(
                     padding: EdgeInsets.only(top: 4),
                     child: Text('Vui lòng chọn quốc gia', style: TextStyle(color: Colors.red, fontSize: 12)),
-                  ),
+                ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _phoneController,
@@ -396,28 +396,28 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        InkWell(
+                InkWell(
                           onTap: isKycApproved ? null : () => _selectDate(context),
-                          child: InputDecorator(
-                            decoration: const InputDecoration(
-                              labelText: 'Ngày sinh',
-                              border: OutlineInputBorder(),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Ngày sinh',
+                      border: OutlineInputBorder(),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
                                 Text(
                                   _selectedDate != null
-                                      ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+                            ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
                                       : 'Chọn ngày sinh',
                                   style: TextStyle(
                                     color: isKycApproved ? Colors.grey : Colors.black,
                                   ),
                                 ),
-                                const Icon(Icons.calendar_today),
-                              ],
-                            ),
-                          ),
+                        const Icon(Icons.calendar_today),
+                      ],
+                    ),
+                  ),
                         ),
                         if (!isKycApproved)
                           Padding(

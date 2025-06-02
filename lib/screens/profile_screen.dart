@@ -13,8 +13,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch user info khi màn hình được tạo
-    Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo(context);
+    });
   }
 
   void _navigateToHome() {

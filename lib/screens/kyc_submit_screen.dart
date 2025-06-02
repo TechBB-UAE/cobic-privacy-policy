@@ -103,7 +103,7 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
       await Future.delayed(const Duration(milliseconds: 1200));
       if (mounted) {
         try {
-          await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo();
+          await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo(context);
         } catch (_) {}
         Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const MainTabScreen(initialTab: 0)),

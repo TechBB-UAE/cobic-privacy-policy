@@ -21,6 +21,9 @@ class MiningProvider extends ChangeNotifier {
         final data = res.data;
         canMine = data['canMine'] ?? false;
         nextMiningTime = data['nextMiningTime'] != null ? DateTime.parse(data['nextMiningTime']).toUtc() : null;
+        if (nextMiningTime != null && DateTime.now().toUtc().isAfter(nextMiningTime!)) {
+          canMine = true;
+        }
         balance = data['balance']?.toString() ?? '0.00';
         miningRate = data['miningRate']?.toString() ?? '0.00';
       } else {

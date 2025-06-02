@@ -80,10 +80,10 @@ class _LoginScreenState extends State<LoginScreen> {
               child: UserInfoCard(username: username, password: password),
             ),
           );
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-            (route) => false,
-          );
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+              (route) => false,
+            );
         }
       } else {
         setState(() { _error = 'Đăng nhập nhanh thất bại!'; });
