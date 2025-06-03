@@ -63,14 +63,16 @@ class _MiningScreenState extends State<MiningScreen> {
         final token = await _secureStorage.read(key: 'token');
         if (token != null) {
           await miningProvider.fetchMiningStatus(token);
-          if (miningProvider.canMine) {
+          final updatedProvider = Provider.of<MiningProvider>(context, listen: true);
+          setState(() {});
+          if (updatedProvider.canMine) {
             setState(() {});
           }
         }
       } else {
-        setState(() {
+      setState(() {
           _countdown = diff;
-        });
+      });
       }
     } else {
       setState(() {
@@ -158,19 +160,19 @@ class _MiningScreenState extends State<MiningScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
+                Text(
                       miningRate.toStringAsFixed(4),
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
                         color: AppTheme.textColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 32,
                       ),
-                    ),
+                ),
                     const SizedBox(width: 8),
                     Padding(
                       padding: EdgeInsets.only(bottom: 4),
                       child: Text(
-                        'Cobic/hr',
+                  'Cobic/hr',
                         style: TextStyle(
                           color: AppTheme.lightTheme.primaryColor,
                           fontSize: 16,
@@ -262,7 +264,7 @@ class _MiningScreenState extends State<MiningScreen> {
                 // Card Quét VietQR
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                  color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.grey.shade300, width: 1.2),
                     boxShadow: [

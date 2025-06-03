@@ -19,7 +19,7 @@ class MiningProvider extends ChangeNotifier {
       final res = await ApiService.getMiningStatus(token);
       if (res.statusCode == 200) {
         final data = res.data;
-        canMine = data['canMine'] ?? false;
+        canMine = data['canStartMining'] ?? false;
         nextMiningTime = data['nextMiningTime'] != null ? DateTime.parse(data['nextMiningTime']).toUtc() : null;
         if (nextMiningTime != null && DateTime.now().toUtc().isAfter(nextMiningTime!)) {
           canMine = true;
