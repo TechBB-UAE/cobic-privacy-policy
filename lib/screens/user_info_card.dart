@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UserInfoCard extends StatefulWidget {
   final String username;
@@ -32,7 +33,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
   Future<void> _copyToClipboard(String text, String label) async {
     await Clipboard.setData(ClipboardData(text: text));
     setState(() {
-      _message = '$label đã được sao chép!';
+      _message = AppLocalizations.of(context)!.copyReferralCode;
       _messageColor = Colors.blueAccent;
     });
   }
@@ -55,7 +56,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
         );
         if ((result['isSuccess'] == true || result['isSuccess'] == 1) && mounted) {
           setState(() {
-            _message = 'Đã lưu thông tin vào thư viện ảnh!';
+            _message = AppLocalizations.of(context)!.guestSavedToGallery;
             _messageColor = Colors.green;
           });
         } else {
@@ -80,6 +81,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Material(
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(20),
@@ -133,9 +135,9 @@ class _UserInfoCardState extends State<UserInfoCard> {
                           fit: BoxFit.contain,
                         ),
                         const SizedBox(height: 10),
-                        const Text(
-                          'Tài khoản khách',
-                          style: TextStyle(
+                        Text(
+                          l10n.guestAccountTitle,
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 22,
                             color: Colors.black,
@@ -147,11 +149,11 @@ class _UserInfoCardState extends State<UserInfoCard> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('Tên đăng nhập:', style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black87)),
+                            Text(l10n.guestUsername, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black87)),
                             IconButton(
                               icon: const Icon(Icons.copy, size: 18, color: Colors.grey),
-                              tooltip: 'Sao chép tên đăng nhập',
-                              onPressed: () => _copyToClipboard(widget.username, 'Tên đăng nhập'),
+                              tooltip: l10n.copyReferralCode,
+                              onPressed: () => _copyToClipboard(widget.username, l10n.guestUsername),
                             ),
                           ],
                         ),
@@ -170,11 +172,11 @@ class _UserInfoCardState extends State<UserInfoCard> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('Mật khẩu:', style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black87)),
+                            Text(l10n.guestPassword, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black87)),
                             IconButton(
                               icon: const Icon(Icons.copy, size: 18, color: Colors.grey),
-                              tooltip: 'Sao chép mật khẩu',
-                              onPressed: () => _copyToClipboard(widget.password, 'Mật khẩu'),
+                              tooltip: l10n.copyReferralCode,
+                              onPressed: () => _copyToClipboard(widget.password, l10n.guestPassword),
                             ),
                           ],
                         ),
@@ -189,9 +191,9 @@ class _UserInfoCardState extends State<UserInfoCard> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 18),
-                        const Text(
-                          'Lưu lại thông tin này để đăng nhập về sau!',
-                          style: TextStyle(color: Colors.grey, fontSize: 13, fontStyle: FontStyle.italic),
+                        Text(
+                          l10n.guestSaveInfoNote,
+                          style: const TextStyle(color: Colors.grey, fontSize: 13, fontStyle: FontStyle.italic),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -225,7 +227,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
                       textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Đóng'),
+                    child: Text(l10n.close),
                   ),
                 ),
               ],
@@ -238,7 +240,7 @@ class _UserInfoCardState extends State<UserInfoCard> {
                 icon: Icon(Icons.close, color: Colors.grey[600]),
                 onPressed: () => Navigator.of(context).pop(),
                 splashRadius: 20,
-                tooltip: 'Đóng',
+                tooltip: l10n.close,
               ),
             ),
           ],

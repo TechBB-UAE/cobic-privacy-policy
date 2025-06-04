@@ -6,6 +6,8 @@ import 'package:cobic/services/task_service.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/screens/scan_qr_screen.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:cobic/widgets/language_switch_button.dart';
 
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({Key? key}) : super(key: key);
@@ -84,9 +86,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: CustomAppBar(
-        titleText: 'Danh sách nhiệm vụ',
+        titleText: l10n.tasks,
         backgroundColor: Colors.white,
         iconColor: AppTheme.textColor,
         centerTitle: true,
@@ -97,6 +100,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           },
         ),
         actions: [
+          const LanguageSwitchButton(),
           IconButton(
             icon: const Icon(Icons.qr_code_scanner, color: AppTheme.textColor),
             onPressed: () async {
@@ -123,7 +127,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           'all': Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             child: Text(
-                              'Tất cả',
+                              l10n.all,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: _selectedStatus == 'all' ? Colors.white : Colors.black,
@@ -133,7 +137,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           'not_submitted': Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             child: Text(
-                              'Chưa nộp',
+                              l10n.notSubmitted,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: _selectedStatus == 'not_submitted' ? Colors.white : Colors.black,
@@ -143,7 +147,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           'pending': Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             child: Text(
-                              'Đang chờ duyệt',
+                              l10n.pendingTask,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: _selectedStatus == 'pending' ? Colors.white : Colors.black,
@@ -153,7 +157,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           'approved': Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             child: Text(
-                              'Đã được duyệt',
+                              l10n.approvedTask,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: _selectedStatus == 'approved' ? Colors.white : Colors.black,
@@ -163,7 +167,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           'rejected': Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             child: Text(
-                              'Bị từ chối',
+                              l10n.rejectedTask,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: _selectedStatus == 'rejected' ? Colors.white : Colors.black,
@@ -336,7 +340,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                           ),
-                          child: const Text('Trang trước', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          child: Text(
+                            l10n.previousPage,
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
                         ),
                         const SizedBox(width: 16),
                         ElevatedButton(

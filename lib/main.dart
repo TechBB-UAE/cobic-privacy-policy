@@ -9,17 +9,25 @@ import 'package:cobic/providers/profile_provider.dart';
 import 'package:cobic/providers/referral_provider.dart';
 import 'package:cobic/screens/main_tab_screen.dart';
 import 'package:cobic/screens/login_screen.dart';
-import 'package:cobic/screens/profile_screen.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'providers/language_provider.dart';
+import 'screens/settings/settings_screen.dart';
 
-void main() {
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
   ApiService.init();
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => MiningProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => MiningProvider()),
         ChangeNotifierProvider(create: (_) => ReferralProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
       ],
       child: const MyApp(),
     ),
@@ -31,28 +39,49 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Cobic',
-      theme: AppTheme.lightTheme.copyWith(
-        popupMenuTheme: const PopupMenuThemeData(
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-            side: BorderSide(color: Colors.grey, width: 1.2),
+    final languageProvider = Provider.of<LanguageProvider>(context);
+    return Consumer<LanguageProvider>(
+      builder: (context, languageProvider, child) {
+        return MaterialApp(
+          title: 'Cobic',
+          theme: AppTheme.lightTheme.copyWith(
+            popupMenuTheme: const PopupMenuThemeData(
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(14)),
+                side: BorderSide(color: Color(0xFFE0E0E0), width: 1.2),
+              ),
+              elevation: 8,
+            ),
           ),
-        ),
-      ),
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      initialRoute: '/splash',
-      routes: {
-        '/splash': (context) => const SplashToHome(),
-        '/home': (context) => const HomeScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/main': (context) => const MainTabScreen(initialTab: 0),
-        '/profile': (context) => const ProfileScreen(),
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.system,
+          initialRoute: '/splash',
+          routes: {
+            '/splash': (context) => const SplashToHome(),
+            '/home': (context) => const HomeScreen(),
+            '/login': (context) => const LoginScreen(),
+            '/main': (context) => const MainTabScreen(initialTab: 0),
+            '/profile': (context) => Scaffold(
+              appBar: AppBar(title: Text('Profile Screen')),
+              body: Center(child: Text('Profile Screen')),
+            ),
+            '/settings': (context) => const SettingsScreen(),
+          },
+          navigatorKey: navigatorKey,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en', ''), // English
+            Locale('vi', ''), // Vietnamese
+          ],
+          locale: Locale(languageProvider.currentLanguage),
+        );
       },
-      navigatorKey: GlobalKey<NavigatorState>(),
     );
   }
 }

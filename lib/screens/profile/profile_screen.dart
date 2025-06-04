@@ -15,37 +15,41 @@ import 'package:cobic/screens/main_tab_screen.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/screens/kyc_submit_screen.dart';
 import 'package:cobic/screens/scan_qr_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:cobic/providers/language_provider.dart';
+import 'package:cobic/widgets/language_switch_button.dart';
 
 class ProfileScreen extends StatelessWidget {
   final GlobalKey<NavigatorState>? navigatorKey;
   const ProfileScreen({super.key, this.navigatorKey});
 
-  String _formatDate(String? dateStr) {
-    if (dateStr == null) return 'Chưa cập nhật';
+  String _formatDate(String? dateStr, AppLocalizations l10n) {
+    if (dateStr == null) return l10n.notUpdated;
     try {
       final date = DateTime.parse(dateStr);
       return '${date.day}/${date.month}/${date.year}';
     } catch (e) {
-      return 'Chưa cập nhật';
+      return l10n.notUpdated;
     }
   }
 
-  String _formatKycStatus(String? status) {
-    if (status == null) return 'Chưa xác thực';
+  String _formatKycStatus(String? status, AppLocalizations l10n) {
+    if (status == null) return l10n.notUpdated;
     switch (status.toLowerCase()) {
       case 'pending':
-        return 'Đang chờ duyệt';
+        return l10n.pending;
       case 'approved':
-        return 'Đã xác thực';
+        return l10n.approved;
       case 'rejected':
-        return 'Từ chối';
+        return l10n.rejected;
       default:
-        return 'Chưa xác thực';
+        return l10n.notUpdated;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final profileProvider = Provider.of<ProfileProvider>(context);
     final userInfo = profileProvider.userInfo;
     final isLoading = profileProvider.isLoading;
@@ -62,7 +66,7 @@ class ProfileScreen extends StatelessWidget {
     }
     return Scaffold(
       appBar: CustomAppBar(
-        titleText: 'Cá nhân',
+        titleText: l10n.profile,
         backgroundColor: Colors.white,
         iconColor: AppTheme.textColor,
         centerTitle: true,
@@ -76,6 +80,7 @@ class ProfileScreen extends StatelessWidget {
           },
         ),
         actions: [
+          const LanguageSwitchButton(),
           IconButton(
             icon: const Icon(Icons.qr_code_scanner, color: AppTheme.textColor),
             onPressed: () async {
@@ -105,7 +110,7 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              userInfo['email'] ?? 'Chưa cập nhật email',
+              userInfo['email'] ?? l10n.missingEmail,
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 24),
@@ -125,45 +130,45 @@ class ProfileScreen extends StatelessWidget {
                   children: [
                     _infoTile(
                       icon: Icons.code,
-                      label: 'Mã giới thiệu',
-                      value: userInfo['referralCode'] ?? 'Chưa có',
+                      label: l10n.referralCode,
+                      value: userInfo['referralCode'] ?? l10n.notUpdated,
                       copyable: (userInfo['referralCode'] ?? '').toString().isNotEmpty,
                       context: context,
                     ),
                     _infoTile(
                       icon: Icons.balance,
-                      label: 'Số dư',
+                      label: l10n.balance,
                       value: '${userInfo['balance'] ?? '0.00'} COBIC',
                       context: context,
                     ),
                     _infoTile(
                       icon: Icons.balance,
-                      label: 'Số dư không chuyển được',
+                      label: l10n.nonTransferableBalance,
                       value: '${userInfo['nonTransferableBalance'] ?? '0.00'} COBIC',
                       context: context,
                     ),
                     _infoTile(
                       icon: Icons.calculate,
-                      label: 'Tỷ lệ đào',
-                      value: '${double.tryParse(userInfo['miningRate']?.toString() ?? '0')?.toStringAsFixed(4) ?? '0.0000'} COBIC/ngày',
+                      label: l10n.miningRate,
+                      value: l10n.cobicPerDay(double.tryParse(userInfo['miningRate']?.toString() ?? '0')?.toStringAsFixed(4) ?? '0.0000'),
                       context: context,
                     ),
                     _infoTile(
                       icon: Icons.cake,
-                      label: 'Ngày sinh',
-                      value: _formatDate(userInfo['dateOfBirth']),
+                      label: l10n.dob,
+                      value: _formatDate(userInfo['dateOfBirth'], l10n),
                       context: context,
                     ),
                     _infoTile(
                       icon: Icons.verified,
-                      label: 'Trạng thái KYC',
-                      value: _formatKycStatus(userInfo['kycStatus']),
+                      label: l10n.kycStatus,
+                      value: _formatKycStatus(userInfo['kycStatus'], l10n),
                       context: context,
                     ),
                     if (userInfo['kycRejectionReason'] != null)
                       _infoTile(
                         icon: Icons.error,
-                        label: 'Lý do từ chối KYC',
+                        label: l10n.reasonKycRejected,
                         value: userInfo['kycRejectionReason'],
                         context: context,
                         isLongText: true,
@@ -186,7 +191,7 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   ListTile(
                     leading: Icon(Icons.edit, color: AppTheme.lightTheme.primaryColor),
-                    title: Text('Cập nhật hồ sơ', style: TextStyle(color: AppTheme.textColor)),
+                    title: Text(l10n.edit, style: TextStyle(color: AppTheme.textColor)),
                     onTap: () {
                       if (navigatorKey != null) {
                         navigatorKey!.currentState?.push(
@@ -207,7 +212,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   ListTile(
                     leading: Icon(Icons.lock, color: AppTheme.lightTheme.primaryColor),
-                    title: Text('Đổi mật khẩu', style: TextStyle(color: AppTheme.textColor)),
+                    title: Text(l10n.changePassword, style: TextStyle(color: AppTheme.textColor)),
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -218,7 +223,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   ListTile(
                     leading: Icon(Icons.verified_user, color: AppTheme.lightTheme.primaryColor),
-                    title: Text('Gửi KYC', style: TextStyle(color: AppTheme.textColor)),
+                    title: Text(l10n.sendKyc, style: TextStyle(color: AppTheme.textColor)),
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -229,7 +234,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   ListTile(
                     leading: Icon(Icons.logout, color: Colors.redAccent),
-                    title: Text('Đăng xuất', style: TextStyle(color: AppTheme.textColor)),
+                    title: Text(l10n.logout, style: TextStyle(color: AppTheme.textColor)),
                     onTap: () => _confirmLogout(context),
                   ),
                 ],
@@ -242,31 +247,32 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _confirmLogout(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppTheme.lightTheme.cardTheme.color,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Xác nhận đăng xuất',
+          l10n.logoutConfirmTitle,
           style: TextStyle(
             color: AppTheme.lightTheme.textTheme.displayMedium?.color ?? Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
-        content: const Text(
-          'Bạn có chắc chắn muốn đăng xuất không?',
-          style: TextStyle(color: AppTheme.textColor),
+        content: Text(
+          l10n.logoutConfirmContent,
+          style: const TextStyle(color: AppTheme.textColor),
         ),
         actions: [
           TextButton(
-            child: const Text('Huỷ'),
+            child: Text(l10n.cancel),
             onPressed: () => Navigator.of(context).pop(),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            child: const Text('Đăng xuất'),
+            child: Text(l10n.logout),
             onPressed: () async {
               Navigator.of(context).pop();
               await _logout(context);
@@ -286,12 +292,12 @@ class ProfileScreen extends StatelessWidget {
     Provider.of<MiningProvider>(context, listen: false).reset();
     
     // Hiện thông báo
-    ErrorUtils.showSuccessToast(context, 'Đăng xuất thành công!');
+    ErrorUtils.showSuccessToast(context, AppLocalizations.of(context)!.logoutSuccess);
 
     // Chuyển về HomeScreen
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-          (route) => false,
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      (route) => false,
     );
   }
 
@@ -303,6 +309,7 @@ class ProfileScreen extends StatelessWidget {
     required BuildContext context,
     bool isLongText = false,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -330,7 +337,7 @@ class ProfileScreen extends StatelessWidget {
                               builder: (dialogContext) => AlertDialog(
                                 backgroundColor: AppTheme.lightTheme.cardTheme.color,
                                 title: Text(
-                                  'Lý do từ chối KYC',
+                                  l10n.reasonKycRejected,
                                   style: TextStyle(
                                     color: AppTheme.lightTheme.textTheme.displayMedium?.color ?? Colors.white,
                                     fontWeight: FontWeight.bold,
@@ -341,7 +348,7 @@ class ProfileScreen extends StatelessWidget {
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.of(dialogContext).pop(),
-                                    child: const Text('Đóng'),
+                                    child: Text(l10n.close),
                                   ),
                                 ],
                               ),
@@ -365,10 +372,10 @@ class ProfileScreen extends StatelessWidget {
                 if (copyable && value.isNotEmpty)
                   IconButton(
                     icon: const Icon(Icons.copy, size: 18, color: Colors.deepPurple),
-                    tooltip: 'Sao chép',
+                    tooltip: l10n.copyReferralCode,
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: value));
-                      ErrorUtils.showSuccessToast(context, 'Đã sao chép mã giới thiệu!');
+                      ErrorUtils.showSuccessToast(context, l10n.copyReferralCode);
                     },
                   ),
               ],

@@ -3,9 +3,10 @@ import 'package:cobic/theme/app_theme.dart';
 import 'package:cobic/services/api_service.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'dart:async';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
+  const ForgotPasswordScreen({Key? key}) : super(key: key);
 
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
@@ -65,9 +66,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quên mật khẩu'),
+        title: Text(l10n.forgotPasswordTitle),
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
@@ -81,19 +83,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               children: [
                 Icon(Icons.lock_reset, size: 60, color: AppTheme.primaryColor),
                 const SizedBox(height: 18),
-                const Text('Nhập email đã đăng ký để nhận hướng dẫn đặt lại mật khẩu.',
-                  style: TextStyle(fontSize: 15), textAlign: TextAlign.center),
+                Text(l10n.forgotPasswordDesc,
+                  style: const TextStyle(fontSize: 15), textAlign: TextAlign.center),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email),
+                  decoration: InputDecoration(
+                    labelText: l10n.email,
+                    prefixIcon: const Icon(Icons.email),
                   ),
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập email';
+                    if (value == null || value.trim().isEmpty) return l10n.emailRequired;
                     final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.[a-zA-Z]{2,}');
-                    if (!emailRegex.hasMatch(value.trim())) return 'Email không hợp lệ';
+                    if (!emailRegex.hasMatch(value.trim())) return l10n.emailInvalid;
                     return null;
                   },
                   enabled: !_loading,
@@ -102,7 +104,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 if (_message != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(_message!, style: const TextStyle(color: Colors.green)),
+                    child: Text(_message!, style: TextStyle(color: _message == l10n.resetLinkSent ? Colors.green : Colors.red)),
                   ),
                 if (_error != null)
                   Padding(
@@ -121,7 +123,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                     child: _loading
                         ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : Text(_resendCooldown > 0 ? 'Gửi lại sau $_resendCooldown giây' : 'Gửi yêu cầu', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        : Text(_resendCooldown > 0 ? 'Gửi lại sau $_resendCooldown giây' : l10n.sendResetLink, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],

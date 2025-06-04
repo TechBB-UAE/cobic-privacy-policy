@@ -10,6 +10,7 @@ import 'package:cobic/screens/wallet_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:cobic/screens/referral_screen.dart';
 import 'package:cobic/screens/scan_qr_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 // TODO: import các màn hình khác (task, mining, wallet, referral)
 
 class MainTabScreen extends StatefulWidget {
@@ -64,6 +65,7 @@ class _MainTabScreenState extends State<MainTabScreen> {
     if (currentNavigator != null && currentNavigator.canPop()) {
       showAppBar = false;
     }
+    final l10n = AppLocalizations.of(context)!;
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -127,12 +129,12 @@ class _MainTabScreenState extends State<MainTabScreen> {
             unselectedItemColor: AppTheme.textColor.withOpacity(0.6),
             selectedIconTheme: const IconThemeData(color: Color(0xFF0066cc)),
             unselectedIconTheme: IconThemeData(color: AppTheme.textColor.withOpacity(0.6)),
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Cá nhân'),
-              BottomNavigationBarItem(icon: Icon(Icons.assignment), label: 'Nhiệm vụ'),
-              BottomNavigationBarItem(icon: Icon(Icons.bolt), label: 'Khai thác'),
-              BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet), label: 'Ví'),
-              BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Giới thiệu'),
+            items: [
+              BottomNavigationBarItem(icon: const Icon(Icons.person), label: l10n.profile),
+              BottomNavigationBarItem(icon: const Icon(Icons.assignment), label: l10n.tasks),
+              BottomNavigationBarItem(icon: const Icon(Icons.bolt), label: l10n.mining),
+              BottomNavigationBarItem(icon: const Icon(Icons.account_balance_wallet), label: l10n.wallet),
+              BottomNavigationBarItem(icon: const Icon(Icons.group), label: l10n.referent),
             ],
           ),
         ),

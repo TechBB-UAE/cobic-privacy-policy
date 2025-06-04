@@ -9,6 +9,7 @@ import 'package:another_flushbar/flushbar.dart';
 import 'profile_screen.dart';
 import 'package:cobic/theme/custom_app_bar.dart';
 import 'package:cobic/utils/error_utils.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ProfileUpdateScreen extends StatefulWidget {
   final GlobalKey<NavigatorState>? navigatorKey;
@@ -206,8 +207,9 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: CustomAppBar(titleText: 'Cập nhật hồ sơ'),
+      appBar: CustomAppBar(titleText: l10n.updateProfileTitle),
       body: Container(
         color: Theme.of(context).scaffoldBackgroundColor,
         child: SingleChildScrollView(
@@ -234,7 +236,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                 TextFormField(
                   controller: _usernameController,
                   decoration: InputDecoration(
-                    labelText: 'Tên đăng nhập',
+                    labelText: l10n.username,
                     border: const OutlineInputBorder(),
                     errorText: _usernameError,
                     suffixIcon: _isCheckingUsername
@@ -252,38 +254,38 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                   ),
                   onChanged: (_) => _checkUsername(),
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập tên đăng nhập';
-                    if (value.length < 4 || value.length > 32) return 'Tên đăng nhập từ 4-32 ký tự';
-                    if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) return 'Chỉ cho phép chữ, số, dấu gạch dưới';
+                    if (value == null || value.trim().isEmpty) return l10n.usernameRequired;
+                    if (value.length < 4 || value.length > 32) return l10n.usernameLength;
+                    if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) return l10n.usernamePattern;
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _fullNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Họ và tên',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.fullName,
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập họ và tên';
-                    if (value.trim().length < 2) return 'Họ và tên tối thiểu 2 ký tự';
+                    if (value == null || value.trim().isEmpty) return l10n.fullNameRequired;
+                    if (value.trim().length < 2) return l10n.fullNameLength;
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.email_outlined),
+                  decoration: InputDecoration(
+                    labelText: l10n.email,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.email_outlined),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập email';
+                    if (value == null || value.trim().isEmpty) return l10n.emailRequired;
                     final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.[a-zA-Z]{2,}');
-                    if (!emailRegex.hasMatch(value.trim())) return 'Email không hợp lệ';
+                    if (!emailRegex.hasMatch(value.trim())) return l10n.emailInvalid;
                     return null;
                   },
                 ),
@@ -297,7 +299,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                         backgroundColor: Colors.white,
                         textStyle: const TextStyle(color: Color(0xFF7C3AED)),
                         inputDecoration: InputDecoration(
-                          labelText: 'Tìm kiếm quốc gia',
+                          labelText: l10n.searchCountry,
                           labelStyle: const TextStyle(color: Color(0xFF7C3AED)),
                           prefixIcon: const Icon(Icons.search, color: Color(0xFF7C3AED)),
                           enabledBorder: OutlineInputBorder(
@@ -326,14 +328,14 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                     );
                   },
                   child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Quốc gia',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.country,
+                      border: const OutlineInputBorder(),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(_selectedCountry?.name ?? 'Chọn quốc gia',
+                        Text(_selectedCountry?.name ?? l10n.chooseCountry,
                             style: TextStyle(
                               color: (_selectedCountry == null) ? Colors.red : Colors.black,
                             )),
@@ -343,44 +345,44 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                   ),
                 ),
                 if (_selectedCountry == null)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 4),
-                    child: Text('Vui lòng chọn quốc gia', style: TextStyle(color: Colors.red, fontSize: 12)),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(l10n.pleaseChooseCountry, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                  ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _phoneController,
                   decoration: InputDecoration(
-                    labelText: 'Số điện thoại',
+                    labelText: l10n.phone,
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.phone_outlined),
                     prefixText: _selectedCountry?.phoneCode != null ? '+${_selectedCountry!.phoneCode} ' : null,
                   ),
                   keyboardType: TextInputType.phone,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập số điện thoại';
+                    if (value == null || value.trim().isEmpty) return l10n.phoneRequired;
                     final phoneRegex = RegExp(r'^(0[0-9]{9,10}|[1-9][0-9]{8,14})$');
-                    if (!phoneRegex.hasMatch(value.trim())) return 'Số điện thoại không hợp lệ';
+                    if (!phoneRegex.hasMatch(value.trim())) return l10n.phoneInvalid;
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _addressController,
-                  decoration: const InputDecoration(
-                    labelText: 'Địa chỉ',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.location_on_outlined),
+                  decoration: InputDecoration(
+                    labelText: l10n.address,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.location_on_outlined),
                   ),
                   validator: (value) => null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _bioController,
-                  decoration: const InputDecoration(
-                    labelText: 'Giới thiệu',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.info_outline),
+                  decoration: InputDecoration(
+                    labelText: l10n.bio,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.info_outline),
                     alignLabelWithHint: true,
                   ),
                   maxLines: 3,
@@ -399,9 +401,9 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                 InkWell(
                           onTap: isKycApproved ? null : () => _selectDate(context),
                   child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Ngày sinh',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.dob,
+                      border: const OutlineInputBorder(),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -409,7 +411,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                                 Text(
                                   _selectedDate != null
                             ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-                                      : 'Chọn ngày sinh',
+                                      : l10n.chooseDob,
                                   style: TextStyle(
                                     color: isKycApproved ? Colors.grey : Colors.black,
                                   ),
@@ -426,12 +428,12 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                               builder: (context) {
                                 return Text(
                                   _selectedDate == null
-                                      ? 'Vui lòng chọn ngày sinh'
+                                      ? l10n.pleaseChooseDob
                                       : (() {
                                           final now = DateTime.now();
                                           final dob = _selectedDate!;
                                           final age = now.year - dob.year - ((now.month < dob.month || (now.month == dob.month && now.day < dob.day)) ? 1 : 0);
-                                          if (age < 18) return 'Bạn phải đủ 18 tuổi trở lên';
+                                          if (age < 18) return l10n.dob18plus;
                                           return '';
                                         })(),
                                   style: const TextStyle(color: Colors.red, fontSize: 12),
@@ -440,11 +442,11 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                             ),
                           ),
                         if (isKycApproved)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
                             child: Text(
-                              'Không thể thay đổi ngày sinh sau khi KYC thành công',
-                              style: TextStyle(color: Colors.red, fontSize: 12),
+                              l10n.cannotChangeDob,
+                              style: const TextStyle(color: Colors.red, fontSize: 12),
                             ),
                           ),
                       ],
@@ -471,7 +473,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text('Cập nhật'),
+                      : Text(l10n.update),
                 ),
               ],
             ),

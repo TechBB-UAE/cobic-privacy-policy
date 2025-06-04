@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/screens/main_tab_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -34,14 +35,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   String? _validatePassword(String? value) {
+    final l10n = AppLocalizations.of(context)!;
     if (value == null || value.isEmpty) {
-      return 'Vui lòng nhập mật khẩu mới';
+      return l10n.newPasswordRequired;
     }
     if (value.length < 8) {
-      return 'Mật khẩu phải có ít nhất 8 ký tự';
+      return l10n.newPasswordLength;
     }
     if (!RegExp(r'[A-Z]').hasMatch(value)) {
-      return 'Mật khẩu phải có ít nhất một chữ cái viết hoa';
+      return l10n.newPasswordUpper;
     }
     return null;
   }
@@ -56,7 +58,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       final token = await storage.read(key: 'token');
       
       if (token == null) {
-        ErrorUtils.showErrorToast(context, 'Không tìm thấy token đăng nhập');
+        ErrorUtils.showErrorToast(context, AppLocalizations.of(context)!.loginTokenNotFound);
         return;
       }
 
@@ -67,7 +69,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       );
 
       if (mounted) {
-        ErrorUtils.showSuccessToast(context, 'Đổi mật khẩu thành công!');
+        ErrorUtils.showSuccessToast(context, AppLocalizations.of(context)!.changePasswordSuccess);
         await Future.delayed(const Duration(milliseconds: 1500));
         Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => MainTabScreen(initialTab: 0)),
@@ -94,7 +96,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
         centerTitle: true,
-        title: const Text('Đổi mật khẩu', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: Text(AppLocalizations.of(context)!.changePasswordTitle, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
@@ -109,7 +111,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 controller: _currentPasswordController,
                 obscureText: _obscureCurrentPassword,
                 decoration: InputDecoration(
-                  labelText: 'Mật khẩu hiện tại',
+                  labelText: AppLocalizations.of(context)!.currentPassword,
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -124,7 +126,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Vui lòng nhập mật khẩu hiện tại';
+                    return AppLocalizations.of(context)!.currentPasswordRequired;
                   }
                   return null;
                 },
@@ -135,7 +137,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 controller: _newPasswordController,
                 obscureText: _obscureNewPassword,
                 decoration: InputDecoration(
-                  labelText: 'Mật khẩu mới',
+                  labelText: AppLocalizations.of(context)!.newPassword,
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -156,7 +158,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 controller: _confirmPasswordController,
                 obscureText: _obscureConfirmPassword,
                 decoration: InputDecoration(
-                  labelText: 'Xác nhận mật khẩu mới',
+                  labelText: AppLocalizations.of(context)!.confirmNewPassword,
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -171,10 +173,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Vui lòng xác nhận mật khẩu mới';
+                    return AppLocalizations.of(context)!.confirmPasswordRequired;
                   }
                   if (value != _newPasswordController.text) {
-                    return 'Mật khẩu xác nhận không khớp';
+                    return AppLocalizations.of(context)!.confirmPasswordNotMatch;
                   }
                   return null;
                 },
@@ -196,14 +198,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : const Text(
-                        'Đổi mật khẩu',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                    : Text(AppLocalizations.of(context)!.changePasswordTitle),
               ),
             ],
           ),

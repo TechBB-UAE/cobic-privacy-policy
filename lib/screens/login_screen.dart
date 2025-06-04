@@ -8,6 +8,7 @@ import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/screens/register_screen.dart';
 import 'package:cobic/screens/forgot_password_screen.dart';
 import 'package:cobic/screens/user_info_card.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -41,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await _secureStorage.write(key: 'username', value: _usernameController.text.trim());
         await _secureStorage.write(key: 'isGuest', value: 'false');
         if (mounted) {
-          ErrorUtils.showSuccessToast(context, 'Đăng nhập thành công!');
+          ErrorUtils.showSuccessToast(context, AppLocalizations.of(context)!.loginSuccess);
           await Future.delayed(const Duration(milliseconds: 1200));
           if (mounted) {
             Navigator.of(context).pushAndRemoveUntil(
@@ -51,10 +52,10 @@ class _LoginScreenState extends State<LoginScreen> {
           }
         }
       } else {
-        setState(() { _error = 'Sai tài khoản hoặc mật khẩu!'; });
+        setState(() { _error = AppLocalizations.of(context)!.wrongCredentials; });
       }
     } catch (e) {
-      setState(() { _error = 'Đăng nhập thất bại!'; });
+      setState(() { _error = AppLocalizations.of(context)!.loginFailed; });
     } finally {
       setState(() { _loading = false; });
     }
@@ -86,10 +87,10 @@ class _LoginScreenState extends State<LoginScreen> {
             );
         }
       } else {
-        setState(() { _error = 'Đăng nhập nhanh thất bại!'; });
+        setState(() { _error = AppLocalizations.of(context)!.guestLoginFailed; });
       }
     } catch (e) {
-      setState(() { _error = 'Đăng nhập nhanh thất bại!'; });
+      setState(() { _error = AppLocalizations.of(context)!.guestLoginFailed; });
     } finally {
       setState(() { _loading = false; });
     }
@@ -102,6 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -120,18 +122,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _usernameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Tên đăng nhập',
-                    prefixIcon: Icon(Icons.person),
+                  decoration: InputDecoration(
+                    labelText: l10n.username,
+                    prefixIcon: const Icon(Icons.person),
                   ),
-                  validator: (value) => (value == null || value.trim().isEmpty) ? 'Vui lòng nhập tên đăng nhập' : null,
+                  validator: (value) => (value == null || value.trim().isEmpty) ? l10n.usernameRequired : null,
                   enabled: !_loading,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
-                    labelText: 'Mật khẩu',
+                    labelText: l10n.password,
                     prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
@@ -143,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   obscureText: _obscurePassword,
-                  validator: (value) => (value == null || value.isEmpty) ? 'Vui lòng nhập mật khẩu' : null,
+                  validator: (value) => (value == null || value.isEmpty) ? l10n.passwordRequired : null,
                   enabled: !_loading,
                 ),
                 Align(
@@ -156,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
                             );
                           },
-                    child: const Text('Quên mật khẩu?'),
+                    child: Text(l10n.forgotPassword),
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -172,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: _loading
                         ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Text('Đăng nhập', style: TextStyle(fontWeight: FontWeight.bold)),
+                        : Text(l10n.login, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -181,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Expanded(child: Divider(color: Colors.grey.shade400, thickness: 1)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text('hoặc', style: TextStyle(color: Colors.grey.shade600)),
+                      child: Text(l10n.or, style: TextStyle(color: Colors.grey.shade600)),
                     ),
                     Expanded(child: Divider(color: Colors.grey.shade400, thickness: 1)),
                   ],
@@ -191,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: _loading ? null : _loginGuest,
-                    child: const Text('Đăng nhập nhanh (khách)'),
+                    child: Text(l10n.loginGuest),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -205,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               MaterialPageRoute(builder: (_) => const RegisterScreen()),
                             );
                           },
-                    child: const Text('Đăng ký tài khoản mới'),
+                    child: Text(l10n.registerNewAccount),
                   ),
                 ),
                 if (_error != null)

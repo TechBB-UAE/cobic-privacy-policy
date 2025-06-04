@@ -5,8 +5,11 @@ import 'package:provider/provider.dart';
 import 'package:cobic/providers/profile_provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:cobic/services/transaction_service.dart';
+import 'package:cobic/services/transaction_translation_service.dart';
 import 'dart:convert';
 import 'package:cobic/screens/scan_qr_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:cobic/widgets/language_switch_button.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({Key? key}) : super(key: key);
@@ -137,33 +140,16 @@ class _WalletScreenState extends State<WalletScreen> {
     setState(() => isSending = false);
   }
 
-  String _getTransactionTypeVN(String? type) {
-    switch (type) {
-      case 'mining':
-        return 'Khai thác';
-      case 'daily_check_in':
-        return 'Điểm danh';
-      case 'transfer':
-        return 'Chuyển tiền';
-      case 'qr_scan':
-        return 'Quét QR';
-      case 'bounty':
-        return 'Thưởng nhiệm vụ';
-      default:
-        return type ?? '';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final profileProvider = Provider.of<ProfileProvider>(context);
     final userInfo = profileProvider.userInfo;
     final balance = double.tryParse(userInfo?['balance']?.toString() ?? '0.00') ?? 0.0;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
       appBar: CustomAppBar(
-        titleText: 'Ví',
+        titleText: l10n.wallet,
         backgroundColor: Colors.white,
         iconColor: AppTheme.textColor,
         centerTitle: true,
@@ -174,6 +160,7 @@ class _WalletScreenState extends State<WalletScreen> {
           },
         ),
         actions: [
+          const LanguageSwitchButton(),
           IconButton(
             icon: const Icon(Icons.qr_code_scanner, color: AppTheme.textColor),
             onPressed: () async {
@@ -184,6 +171,7 @@ class _WalletScreenState extends State<WalletScreen> {
           ),
         ],
       ),
+      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -205,7 +193,7 @@ class _WalletScreenState extends State<WalletScreen> {
               ),
               child: Column(
                 children: [
-                  Text('Số dư hiện tại', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 16)),
+                  Text(l10n.currentBalance, style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 16)),
                   const SizedBox(height: 8),
                   Text(
                     '${balance.toStringAsFixed(2)} Cobic',
@@ -225,7 +213,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   controller: _receiverController,
                   style: TextStyle(color: AppTheme.textColor),
                   decoration: InputDecoration(
-                    labelText: 'Tên người nhận',
+                    labelText: l10n.receiverName,
                     labelStyle: TextStyle(color: AppTheme.secondaryTextColor),
                     filled: true,
                     fillColor: AppTheme.lightTheme.cardTheme.color,
@@ -239,7 +227,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
                   style: TextStyle(color: AppTheme.textColor),
                   decoration: InputDecoration(
-                    labelText: 'Số lượng (Cobic)',
+                    labelText: l10n.amountCobic,
                     labelStyle: TextStyle(color: AppTheme.secondaryTextColor),
                     filled: true,
                     fillColor: AppTheme.lightTheme.cardTheme.color,
@@ -261,7 +249,7 @@ class _WalletScreenState extends State<WalletScreen> {
                     ),
                     child: isSending
                         ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Text('Gửi', style: TextStyle(fontWeight: FontWeight.bold)),
+                        : Text(l10n.send, style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],
@@ -286,7 +274,7 @@ class _WalletScreenState extends State<WalletScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          'Lịch sử giao dịch',
+                          l10n.transactionHistory,
                           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
                         ),
                       ),
@@ -304,9 +292,9 @@ class _WalletScreenState extends State<WalletScreen> {
                       child: Center(child: Text(_historyError!, style: TextStyle(color: Colors.redAccent))),
                     )
                   else if (allTransactions.isEmpty)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.symmetric(vertical: 32),
-                      child: Center(child: Text('Chưa có giao dịch nào', style: TextStyle(color: Colors.white70))),
+                      child: Center(child: Text(l10n.noTransaction, style: TextStyle(color: Colors.white70))),
                     )
                   else ...pagedTransactions.map((item) => Container(
                     margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
@@ -327,7 +315,7 @@ class _WalletScreenState extends State<WalletScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              _getTransactionTypeVN(item['type']),
+                              TransactionTranslationService.getTransactionTypeText(context, item['type']),
                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -347,7 +335,7 @@ class _WalletScreenState extends State<WalletScreen> {
                         children: [
                           const SizedBox(height: 4),
                           Text(
-                            item['description'] ?? '',
+                            TransactionTranslationService.getTransactionDescription(context, item),
                             style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14),
                           ),
                           const SizedBox(height: 2),
@@ -373,7 +361,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                         ),
-                        child: const Text('Trang trước', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        child: Text(l10n.previousPage, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                       ),
                       const SizedBox(width: 16),
                       ElevatedButton(
@@ -386,7 +374,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                         ),
-                        child: const Text('Trang sau', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        child: Text(l10n.nextPage, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),

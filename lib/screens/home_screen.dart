@@ -24,6 +24,9 @@ import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/services/profile_service.dart';
 import 'package:cobic/screens/scan_qr_screen.dart';
 import 'package:cobic/screens/user_info_card.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:cobic/providers/language_provider.dart';
+import 'package:flutter/material.dart' show PopupMenuTheme, Theme, ThemeData, Colors;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -41,6 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _token;
   String? _username;
   Timer? _countdownTimer;
+  final GlobalKey _langBtnKey = GlobalKey();
+  OverlayEntry? _langOverlayEntry;
 
   @override
   void initState() {
@@ -53,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _countdownTimer?.cancel();
+    _hideLanguageOverlay();
     super.dispose();
   }
 
@@ -168,9 +174,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget buildLoginButton() {
     final isLoggedIn = _token != null;
+    final l10n = AppLocalizations.of(context)!;
     final labelText = isLoggedIn
-        ? ((_username != null && _username!.isNotEmpty) ? _username! : 'Tài khoản')
-        : 'Đăng nhập';
+        ? ((_username != null && _username!.isNotEmpty) ? _username! : l10n.account)
+        : l10n.login;
 
     return OutlinedButton.icon(
       style: OutlinedButton.styleFrom(
@@ -208,9 +215,106 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _showLanguageOverlay() {
+    final RenderBox button = _langBtnKey.currentContext!.findRenderObject() as RenderBox;
+    final Offset offset = button.localToGlobal(Offset.zero);
+    final Size size = button.size;
+    final provider = Provider.of<LanguageProvider>(context, listen: false);
+    final current = provider.locale.languageCode;
+    _langOverlayEntry = OverlayEntry(
+      builder: (context) => GestureDetector(
+        onTap: _hideLanguageOverlay,
+        behavior: HitTestBehavior.translucent,
+        child: Stack(
+          children: [
+            Positioned(
+              top: offset.dy + size.height + 8,
+              left: offset.dx + size.width - 180,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  width: 180,
+                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          _hideLanguageOverlay();
+                          provider.setLocale(const Locale('vi'));
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 18),
+                          child: Row(
+                            children: [
+                              const Text('🇻🇳', style: TextStyle(fontSize: 24)),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Tiếng Việt',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: current == 'vi' ? Colors.black : Colors.black.withOpacity(0.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          _hideLanguageOverlay();
+                          provider.setLocale(const Locale('en'));
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 18),
+                          child: Row(
+                            children: [
+                              const Text('🇬🇧', style: TextStyle(fontSize: 24)),
+                              const SizedBox(width: 8),
+                              Text(
+                                'English',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: current == 'en' ? Colors.black : Colors.black.withOpacity(0.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    Overlay.of(context).insert(_langOverlayEntry!);
+  }
+
+  void _hideLanguageOverlay() {
+    _langOverlayEntry?.remove();
+    _langOverlayEntry = null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final mining = Provider.of<MiningProvider>(context);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -221,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           if (_token != null)
             _UserMenuButton(
-              username: (_username != null && _username!.isNotEmpty) ? _username! : 'Tài khoản',
+              username: (_username != null && _username!.isNotEmpty) ? _username! : AppLocalizations.of(context)!.account,
               onProfile: () {
                 Navigator.of(context).pushReplacementNamed('/main');
               },
@@ -231,7 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Provider.of<ProfileProvider>(context, listen: false).error = null;
                 Provider.of<ProfileProvider>(context, listen: false).isLoading = false;
                 Provider.of<MiningProvider>(context, listen: false).reset();
-                ErrorUtils.showSuccessToast(context, 'Đăng xuất thành công!');
+                ErrorUtils.showSuccessToast(context, AppLocalizations.of(context)!.logoutSuccess);
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (_) => const HomeScreen()),
                   (route) => false,
@@ -239,11 +343,42 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             )
           else
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-            child: buildLoginButton(),
-          ),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppTheme.textColor,
+                side: BorderSide(color: Colors.grey.shade300, width: 1.2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                textStyle: const TextStyle(
+                  color: AppTheme.textColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pushReplacementNamed('/login');
+              },
+              icon: const Icon(Icons.person, color: AppTheme.textColor, size: 22),
+              label: Text(
+                AppLocalizations.of(context)!.login,
+                style: const TextStyle(
+                  color: AppTheme.textColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  height: 1.2,
+                ),
+              ),
+            ),
           const SizedBox(width: 8),
+          IconButton(
+            key: _langBtnKey,
+            icon: const Icon(Icons.language),
+            tooltip: 'Đổi ngôn ngữ',
+            onPressed: _showLanguageOverlay,
+          ),
         ],
       ),
       body: Center(
@@ -298,7 +433,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
                     : Text(
-                        _token == null ? 'Bắt đầu khai thác ngay' : (mining.canMine ? 'Sẵn Sàng Khai thác' : 'Đang đếm ngược... ${mining.nextMiningTime != null ? '(${_formatCountdown(mining.nextMiningTime!)})' : ''}')
+                        _token == null
+                            ? l10n.mine
+                            : (mining.canMine
+                                ? l10n.mine
+                                : l10n.countingDown + (mining.nextMiningTime != null ? ' (${_formatCountdown(mining.nextMiningTime!)})' : ''))
                       ),
               ),
             ),
@@ -319,9 +458,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Có thể cập nhật điểm hoặc thông tin khác nếu cần
                   }
                 },
-                child: const Text(
-                  'Quét mã QR',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                child: Text(
+                  l10n.scanQR,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -395,7 +534,7 @@ class _UserMenuButtonState extends State<_UserMenuButton> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Text(
-                            'Trang cá nhân',
+                            AppLocalizations.of(context)!.profile,
                       style: TextStyle(
                               color: AppTheme.textColor,
                         fontWeight: FontWeight.bold,
@@ -413,7 +552,7 @@ class _UserMenuButtonState extends State<_UserMenuButton> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Text(
-                            'Đăng xuất',
+                            AppLocalizations.of(context)!.logout,
                             style: TextStyle(
                               color: Colors.red,
                         fontWeight: FontWeight.bold,

@@ -10,6 +10,8 @@ import 'package:cobic/providers/profile_provider.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/services/referral_service.dart';
 import 'package:cobic/screens/scan_qr_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:cobic/widgets/language_switch_button.dart';
 
 class ReferralScreen extends StatefulWidget {
   @override
@@ -43,9 +45,10 @@ class _ReferralScreenState extends State<ReferralScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: CustomAppBar(
-        titleText: 'Giới thiệu',
+        titleText: l10n.referral,
         backgroundColor: Colors.white,
         iconColor: AppTheme.textColor,
         centerTitle: true,
@@ -56,6 +59,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
           },
         ),
         actions: [
+          const LanguageSwitchButton(),
           IconButton(
             icon: const Icon(Icons.qr_code_scanner, color: AppTheme.textColor),
             onPressed: () async {
@@ -122,7 +126,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Người đã mời', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 13)),
+                          Text(l10n.invitedUsers, style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 13)),
                           const SizedBox(height: 2),
                           Row(
                             children: [
@@ -135,7 +139,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('Lượt mời còn lại', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 13)),
+                          Text(l10n.remainingInvites, style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 13)),
                           const SizedBox(height: 2),
                           Text('${stats.remainingReferrals}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: AppTheme.lightTheme.primaryColor)),
                         ],
@@ -145,7 +149,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                 ),
                 const SizedBox(height: 24),
                 // Người đã mời
-                Text('Người dùng bạn đã mời', style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(l10n.invitedByYou, style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
                 const SizedBox(height: 10),
                 Container(
                   decoration: BoxDecoration(
@@ -166,7 +170,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                       if (totalInvited == 0)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Text('Chưa có ai được mời', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
+                          child: Text(l10n.noInvitedUsers, style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
                         )
                       else ...[
                         ...pagedUsers.map((user) => Container(
@@ -186,7 +190,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                               ),
                               const SizedBox(width: 10),
                               Expanded(child: Text(user.username, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15))),
-                              Text('Tham gia ${_formatDate(user.joinedAt)}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
+                              Text(l10n.joinedAt(_formatDate(user.joinedAt)), style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
                             ],
                           ),
                         )),
@@ -218,7 +222,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                 ),
                 const SizedBox(height: 24),
                 // Người đã mời bạn
-                Text('Người đã mời bạn', style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(l10n.invitedBy, style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
                 const SizedBox(height: 10),
                 Container(
                   decoration: BoxDecoration(
@@ -249,17 +253,17 @@ class _ReferralScreenState extends State<ReferralScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(stats.whoReferredMe!.username, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15)),
-                                  Text('Mã giới thiệu: ${stats.whoReferredMe!.referralCode}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
+                                  Text(l10n.referralCodeLabel(stats.whoReferredMe!.referralCode), style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
                                 ],
                               ),
                             ),
                           ],
                         )
-                      : Text('Chưa có ai mời bạn', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
+                      : Text(l10n.noReferrer, style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
                 ),
                 const SizedBox(height: 24),
                 // Vòng tròn bảo mật
-                Text('Vòng tròn bảo mật', style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(l10n.securityCircle, style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
                 const SizedBox(height: 10),
                 Container(
                   decoration: BoxDecoration(
@@ -290,23 +294,23 @@ class _ReferralScreenState extends State<ReferralScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(stats.securityCircles.first.username, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15)),
-                                  Text('Mã giới thiệu: ${stats.securityCircles.first.referralCode}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
-                                  Text('Tham gia: ${_formatDate(stats.securityCircles.first.joinedAt)}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
+                                  Text(l10n.referralCodeLabel(stats.securityCircles.first.referralCode), style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
+                                  Text(l10n.joinedAt(_formatDate(stats.securityCircles.first.joinedAt)), style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
                                 ],
                               ),
                             ),
                           ],
                         )
-                      : Text('Bạn chưa có vòng tròn bảo mật', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
+                      : Text(l10n.noSecurityCircle, style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Vòng tròn bảo mật được tạo ra khi hai người dùng cùng giới thiệu lẫn nhau. Hãy tìm người bạn tin tưởng và tạo vòng tròn bảo mật để được +0.1 vào tỉ lệ đào.',
+                  l10n.securityCircleDesc,
                   style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12),
                 ),
                 const SizedBox(height: 24),
                 // Mã giới thiệu của bạn
-                Text('Mã giới thiệu của bạn', style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(l10n.yourReferralCode, style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
                 const SizedBox(height: 10),
                 Builder(
                   builder: (context) {
@@ -337,7 +341,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                             onTap: () async {
                               if (referralCode.toString().isNotEmpty) {
                                 await Clipboard.setData(ClipboardData(text: referralCode.toString()));
-                                ErrorUtils.showSuccessToast(context, 'Đã copy mã giới thiệu!');
+                                ErrorUtils.showSuccessToast(context, l10n.copyReferralCode);
                               }
                             },
                             child: Container(
@@ -355,10 +359,10 @@ class _ReferralScreenState extends State<ReferralScreen> {
                   },
                 ),
                 const SizedBox(height: 8),
-                Text('Chia sẻ mã này để mời người khác và nhận thưởng tăng tỉ lệ đào!', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
+                Text(l10n.shareReferral, style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
                 const SizedBox(height: 24),
                 // Nhập mã giới thiệu
-                Text('Nhập mã giới thiệu', style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(l10n.enterReferralCode, style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
                 const SizedBox(height: 10),
                 if (stats.whoReferredMe != null)
                   Container(
@@ -377,7 +381,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                     margin: EdgeInsets.zero,
                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
                     child: Text(
-                      'Bạn đã nhập mã giới thiệu, chỉ được nhập 1 lần duy nhất!',
+                      l10n.alreadyEnteredCode,
                       style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14),
                     ),
                   )
@@ -388,7 +392,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                         child: TextField(
                           controller: _referralCodeController,
                           decoration: InputDecoration(
-                            hintText: 'Nhập mã',
+                            hintText: l10n.referralCodeHint,
                             hintStyle: TextStyle(color: AppTheme.secondaryTextColor),
                             filled: true,
                             fillColor: AppTheme.lightTheme.cardTheme.color,
@@ -406,13 +410,13 @@ class _ReferralScreenState extends State<ReferralScreen> {
                           onPressed: _isSubmitting ? null : () async {
                             final code = _referralCodeController.text.trim();
                             if (code.isEmpty) {
-                              ErrorUtils.showErrorToast(context, 'Vui lòng nhập mã giới thiệu!');
+                              ErrorUtils.showErrorToast(context, l10n.pleaseEnterCode);
                               return;
                             }
                             setState(() => _isSubmitting = true);
                             try {
                               await ReferralService.submitReferralCode(code);
-                              ErrorUtils.showSuccessToast(context, 'Nhập mã giới thiệu thành công!');
+                              ErrorUtils.showSuccessToast(context, l10n.enterCodeSuccess);
                               _referralCodeController.clear();
                               // Cập nhật lại profile
                               await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo(context);
@@ -434,7 +438,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                           ),
                           child: _isSubmitting
                             ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : const Text('Áp dụng', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                            : Text(l10n.apply, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                         ),
                       ),
                     ],

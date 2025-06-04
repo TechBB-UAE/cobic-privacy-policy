@@ -8,6 +8,9 @@ import 'package:cobic/providers/mining_provider.dart';
 import 'package:cobic/providers/profile_provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:cobic/utils/error_utils.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:cobic/widgets/language_switch_button.dart';
+import 'package:cobic/screens/scan_qr_screen.dart';
 
 class MiningScreen extends StatefulWidget {
   final VoidCallback? onScanQR;
@@ -115,26 +118,29 @@ class _MiningScreenState extends State<MiningScreen> {
     final canMine = miningProvider.canMine;
     final nextMiningTime = miningProvider.nextMiningTime;
     final miningRate = double.tryParse(miningProvider.miningRate ?? '0.0') ?? 0.0;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: CustomAppBar(
-        titleText: 'Khai thác',
+        titleText: l10n.mining,
         backgroundColor: Colors.white,
         iconColor: AppTheme.textColor,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.home, color: AppTheme.textColor),
           onPressed: () {
-            Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-              (route) => false,
-            );
+            Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/home', (route) => false);
           },
         ),
         actions: [
+          const LanguageSwitchButton(),
           IconButton(
             icon: const Icon(Icons.qr_code_scanner, color: AppTheme.textColor),
-            onPressed: widget.onScanQR,
+            onPressed: () async {
+              await Navigator.of(context, rootNavigator: true).push(
+                MaterialPageRoute(builder: (_) => const ScanQrScreen(targetRoute: '/home')),
+              );
+            },
           ),
         ],
       ),
@@ -184,7 +190,7 @@ class _MiningScreenState extends State<MiningScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Tỷ lệ đào',
+                  l10n.miningRate,
                   style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14),
                 ),
                 const SizedBox(height: 20),
@@ -226,7 +232,7 @@ class _MiningScreenState extends State<MiningScreen> {
                             onPressed: canMine ? _handleMining : null,
                             icon: Icon(Icons.bolt, size: 22, color: canMine ? Colors.white : AppTheme.textColor),
                             label: Text(
-                              'bắt đầu khai thác ngay',
+                              l10n.mine,
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -240,11 +246,11 @@ class _MiningScreenState extends State<MiningScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Đào tiếp theo', style: TextStyle(color: AppTheme.secondaryTextColor)),
+                            Text(l10n.nextMining, style: TextStyle(color: AppTheme.secondaryTextColor)),
                             Text(
                               canMine
-                                ? 'Sẵn sàng đào!'
-                                : (nextMiningTime != null ? 'Đang đếm ngược... (${_formatCountdown(_countdown)})' : 'Đang đếm ngược...'),
+                                ? l10n.readyToMine
+                                : (nextMiningTime != null ? "${l10n.countingDown} (${_formatCountdown(_countdown)})" : l10n.countingDown),
                               style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.lightTheme.primaryColor),
                             ),
                           ],
@@ -284,12 +290,12 @@ class _MiningScreenState extends State<MiningScreen> {
                           children: [
                             Icon(Icons.qr_code_2, color: AppTheme.lightTheme.primaryColor, size: 28),
                             const SizedBox(width: 8),
-                            Text('Quét VietQR', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.lightTheme.primaryColor, fontSize: 18)),
+                            Text(l10n.scanVietQR, style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.lightTheme.primaryColor, fontSize: 18)),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Quét mã VietQR để nhận Cobic Points\nTích điểm Cobic Points với tỷ lệ 250 VND = 1 Cobic Point.',
+                          l10n.scanVietQRDesc,
                           style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14),
                         ),
                         const SizedBox(height: 16),
@@ -304,7 +310,7 @@ class _MiningScreenState extends State<MiningScreen> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               padding: const EdgeInsets.symmetric(horizontal: 18),
                             ),
-                            child: const Text('Quét Ngay', style: TextStyle(fontWeight: FontWeight.bold)),
+                            child: Text(l10n.scanNow, style: TextStyle(fontWeight: FontWeight.bold)),
                           ),
                         ),
                       ],

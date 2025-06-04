@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:cobic/screens/login_screen.dart';
 import 'package:cobic/screens/home_screen.dart';
 import 'package:cobic/utils/error_utils.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -42,7 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         await _secureStorage.write(key: 'username', value: _usernameController.text.trim());
         await _secureStorage.write(key: 'isGuest', value: 'false');
         if (mounted) {
-          ErrorUtils.showSuccessToast(context, 'Đăng ký thành công!');
+          ErrorUtils.showSuccessToast(context, AppLocalizations.of(context)!.registerSuccess);
           await Future.delayed(const Duration(milliseconds: 1200));
           if (mounted) {
             Navigator.of(context).pushAndRemoveUntil(
@@ -52,7 +53,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           }
         }
       } else {
-        setState(() { _error = 'Đăng ký thất bại!'; });
+        setState(() { _error = AppLocalizations.of(context)!.registerFailed; });
       }
     } catch (e) {
       setState(() { _error = ErrorUtils.parseApiError(e); });
@@ -63,9 +64,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Đăng ký tài khoản'),
+        title: Text(l10n.registerTitle),
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
@@ -86,24 +88,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _usernameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Tên đăng nhập',
-                    prefixIcon: Icon(Icons.person),
+                  decoration: InputDecoration(
+                    labelText: l10n.username,
+                    prefixIcon: const Icon(Icons.person),
                   ),
-                  validator: (value) => (value == null || value.trim().isEmpty) ? 'Vui lòng nhập tên đăng nhập' : null,
+                  validator: (value) => (value == null || value.trim().isEmpty) ? l10n.usernameRequired : null,
                   enabled: !_loading,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email),
+                  decoration: InputDecoration(
+                    labelText: l10n.email,
+                    prefixIcon: const Icon(Icons.email),
                   ),
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Vui lòng nhập email';
+                    if (value == null || value.trim().isEmpty) return l10n.emailRequired;
                     final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.[a-zA-Z]{2,}');
-                    if (!emailRegex.hasMatch(value.trim())) return 'Email không hợp lệ';
+                    if (!emailRegex.hasMatch(value.trim())) return l10n.emailInvalid;
                     return null;
                   },
                   enabled: !_loading,
@@ -113,7 +115,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    labelText: 'Mật khẩu',
+                    labelText: l10n.password,
                     prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
@@ -125,10 +127,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   validator: (value) {
-                    if (value == null || value.length < 6) return 'Mật khẩu tối thiểu 6 ký tự';
+                    if (value == null || value.length < 6) return l10n.passwordMinLength;
                     final hasLetter = RegExp(r'[A-Za-z]').hasMatch(value);
                     final hasNumber = RegExp(r'[0-9]').hasMatch(value);
-                    if (!hasLetter || !hasNumber) return 'Mật khẩu phải có ít nhất 1 chữ cái và 1 số';
+                    if (!hasLetter || !hasNumber) return l10n.passwordPattern;
                     return null;
                   },
                   enabled: !_loading,
@@ -138,7 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _confirmPasswordController,
                   obscureText: _obscureConfirmPassword,
                   decoration: InputDecoration(
-                    labelText: 'Xác nhận mật khẩu',
+                    labelText: l10n.confirmPassword,
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
@@ -149,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
                   ),
-                  validator: (value) => value != _passwordController.text ? 'Mật khẩu không khớp' : null,
+                  validator: (value) => value != _passwordController.text ? l10n.confirmPasswordNotMatch : null,
                   enabled: !_loading,
                 ),
                 const SizedBox(height: 24),
@@ -170,10 +172,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     child: _loading
                         ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Text('Đăng ký', style: TextStyle(fontWeight: FontWeight.bold)),
+                        : Text(l10n.register, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
-                const SizedBox(height: 16),
                 TextButton(
                   onPressed: _loading
                       ? null
@@ -182,7 +183,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             MaterialPageRoute(builder: (_) => const LoginScreen()),
                           );
                         },
-                  child: const Text('Đã có tài khoản? Đăng nhập'),
+                  child: Text(l10n.alreadyHaveAccount),
                 ),
               ],
             ),
