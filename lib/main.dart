@@ -14,11 +14,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'providers/language_provider.dart';
 import 'screens/settings/settings_screen.dart';
+import 'providers/theme_provider.dart';
+import 'package:flutter/services.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   final prefs = await SharedPreferences.getInstance();
   ApiService.init();
   runApp(
@@ -28,6 +34,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => MiningProvider()),
         ChangeNotifierProvider(create: (_) => ReferralProvider()),
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: const MyApp(),
     ),
@@ -40,8 +47,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
-    return Consumer<LanguageProvider>(
-      builder: (context, languageProvider, child) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    
+    return Consumer2<LanguageProvider, ThemeProvider>(
+      builder: (context, languageProvider, themeProvider, child) {
         return MaterialApp(
           title: 'Cobic',
           theme: AppTheme.lightTheme.copyWith(
@@ -54,8 +63,17 @@ class MyApp extends StatelessWidget {
               elevation: 8,
             ),
           ),
-          darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.system,
+          darkTheme: AppTheme.darkTheme.copyWith(
+            popupMenuTheme: const PopupMenuThemeData(
+              color: AppTheme.darkCardColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(14)),
+                side: BorderSide(color: AppTheme.darkSecondaryColor, width: 1.2),
+              ),
+              elevation: 8,
+            ),
+          ),
+          themeMode: themeProvider.themeMode,
           initialRoute: '/splash',
           routes: {
             '/splash': (context) => const SplashToHome(),

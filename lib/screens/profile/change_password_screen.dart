@@ -8,6 +8,8 @@ import 'package:dio/dio.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/screens/main_tab_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:cobic/providers/theme_provider.dart';
+import 'package:intl/intl.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -76,7 +78,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           (route) => false,
         );
       }
-    } catch (e) {
+    } catch (e, stack) {
+      // Thêm log lỗi
+      debugPrint('ChangePassword error: $e\n$stack');
       final errorMessage = ErrorUtils.parseApiError(e);
       if (mounted) {
         ErrorUtils.showErrorToast(context, errorMessage);
@@ -90,13 +94,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+      appBar: CustomAppBar.themed(
+        context: context,
+        titleText: l10n.changePasswordTitle,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         centerTitle: true,
-        title: Text(AppLocalizations.of(context)!.changePasswordTitle, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
@@ -110,12 +117,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               TextFormField(
                 controller: _currentPasswordController,
                 obscureText: _obscureCurrentPassword,
+                style: Theme.of(context).textTheme.bodyLarge,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.currentPassword,
-                  prefixIcon: const Icon(Icons.lock_outline),
+                  labelText: l10n.currentPassword,
+                  labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                  hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
+                  prefixIcon: Icon(Icons.lock_outline, color: Theme.of(context).iconTheme.color),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscureCurrentPassword ? Icons.visibility_off : Icons.visibility,
+                      color: Theme.of(context).iconTheme.color,
                     ),
                     onPressed: () {
                       setState(() {
@@ -126,7 +137,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!.currentPasswordRequired;
+                    return l10n.currentPasswordRequired;
                   }
                   return null;
                 },
@@ -136,12 +147,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               TextFormField(
                 controller: _newPasswordController,
                 obscureText: _obscureNewPassword,
+                style: Theme.of(context).textTheme.bodyLarge,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.newPassword,
-                  prefixIcon: const Icon(Icons.lock_outline),
+                  labelText: l10n.newPassword,
+                  labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                  hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
+                  prefixIcon: Icon(Icons.lock_outline, color: Theme.of(context).iconTheme.color),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscureNewPassword ? Icons.visibility_off : Icons.visibility,
+                      color: Theme.of(context).iconTheme.color,
                     ),
                     onPressed: () {
                       setState(() {
@@ -157,12 +172,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               TextFormField(
                 controller: _confirmPasswordController,
                 obscureText: _obscureConfirmPassword,
+                style: Theme.of(context).textTheme.bodyLarge,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.confirmNewPassword,
-                  prefixIcon: const Icon(Icons.lock_outline),
+                  labelText: l10n.confirmNewPassword,
+                  labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                  hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
+                  prefixIcon: Icon(Icons.lock_outline, color: Theme.of(context).iconTheme.color),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                      color: Theme.of(context).iconTheme.color,
                     ),
                     onPressed: () {
                       setState(() {
@@ -173,10 +192,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!.confirmPasswordRequired;
+                    return l10n.confirmPasswordRequired;
                   }
                   if (value != _newPasswordController.text) {
-                    return AppLocalizations.of(context)!.confirmPasswordNotMatch;
+                    return l10n.confirmPasswordNotMatch;
                   }
                   return null;
                 },
@@ -187,7 +206,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 onPressed: _isLoading ? null : _changePassword,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: AppTheme.lightTheme.primaryColor,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                 ),
                 child: _isLoading
                     ? const SizedBox(
@@ -198,7 +217,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : Text(AppLocalizations.of(context)!.changePasswordTitle),
+                    : Text(l10n.changePasswordTitle, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ],
           ),

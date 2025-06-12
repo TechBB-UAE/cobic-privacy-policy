@@ -18,6 +18,7 @@ import 'package:cobic/screens/scan_qr_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:cobic/providers/language_provider.dart';
 import 'package:cobic/widgets/language_switch_button.dart';
+import 'package:cobic/providers/theme_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   final GlobalKey<NavigatorState>? navigatorKey;
@@ -65,24 +66,27 @@ class ProfileScreen extends StatelessWidget {
       return const Center(child: Text('Không có dữ liệu tài khoản!'));
     }
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: CustomAppBar.themed(
+        context: context,
         titleText: l10n.profile,
-        backgroundColor: Colors.white,
-        iconColor: AppTheme.textColor,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.home, color: AppTheme.textColor),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-              (route) => false,
-            );
-          },
-        ),
         actions: [
           const LanguageSwitchButton(),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) => IconButton(
+              icon: Icon(
+                themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              tooltip: themeProvider.isDarkMode ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối',
+              onPressed: () {
+                themeProvider.setThemeMode(
+                  themeProvider.isDarkMode ? ThemeMode.light : ThemeMode.dark
+                );
+              },
+            ),
+          ),
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner, color: AppTheme.textColor),
+            icon: Icon(Icons.qr_code_scanner, color: Theme.of(context).iconTheme.color),
             onPressed: () async {
               await Navigator.of(context, rootNavigator: true).push(
                 MaterialPageRoute(builder: (_) => const ScanQrScreen(targetRoute: '/home')),
@@ -90,6 +94,16 @@ class ProfileScreen extends StatelessWidget {
             },
           ),
         ],
+        leading: IconButton(
+          icon: Icon(Icons.home, color: Theme.of(context).iconTheme.color),
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+              (route) => false,
+            );
+          },
+        ),
+        centerTitle: true,
       ),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
@@ -106,22 +120,22 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               userInfo['fullName'] ?? userInfo['username'] ?? 'Chưa cập nhật',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               userInfo['email'] ?? l10n.missingEmail,
-              style: const TextStyle(fontSize: 16),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 24),
             Card(
-              color: Colors.white,
-              surfaceTintColor: Colors.white,
+              color: Theme.of(context).cardColor,
+              surfaceTintColor: Theme.of(context).cardColor,
               shadowColor: Colors.black12,
               elevation: 2,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(color: Colors.white, width: 1),
+                side: BorderSide(color: Theme.of(context).dividerColor, width: 1),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -179,19 +193,19 @@ class ProfileScreen extends StatelessWidget {
             ),
             Card(
               margin: const EdgeInsets.only(top: 24, bottom: 12),
-              color: Colors.white,
-              surfaceTintColor: Colors.white,
+              color: Theme.of(context).cardColor,
+              surfaceTintColor: Theme.of(context).cardColor,
               shadowColor: Colors.black12,
               elevation: 2,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(color: Colors.white, width: 1),
+                side: BorderSide(color: Theme.of(context).dividerColor, width: 1),
               ),
               child: Column(
                 children: [
                   ListTile(
-                    leading: Icon(Icons.edit, color: AppTheme.lightTheme.primaryColor),
-                    title: Text(l10n.edit, style: TextStyle(color: AppTheme.textColor)),
+                    leading: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
+                    title: Text(l10n.edit, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
                     onTap: () {
                       if (navigatorKey != null) {
                         navigatorKey!.currentState?.push(
@@ -211,8 +225,8 @@ class ProfileScreen extends StatelessWidget {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.lock, color: AppTheme.lightTheme.primaryColor),
-                    title: Text(l10n.changePassword, style: TextStyle(color: AppTheme.textColor)),
+                    leading: Icon(Icons.lock, color: Theme.of(context).colorScheme.primary),
+                    title: Text(l10n.changePassword, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -222,8 +236,8 @@ class ProfileScreen extends StatelessWidget {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.verified_user, color: AppTheme.lightTheme.primaryColor),
-                    title: Text(l10n.sendKyc, style: TextStyle(color: AppTheme.textColor)),
+                    leading: Icon(Icons.verified_user, color: Theme.of(context).colorScheme.primary),
+                    title: Text(l10n.sendKyc, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -234,7 +248,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   ListTile(
                     leading: Icon(Icons.logout, color: Colors.redAccent),
-                    title: Text(l10n.logout, style: TextStyle(color: AppTheme.textColor)),
+                    title: Text(l10n.logout, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
                     onTap: () => _confirmLogout(context),
                   ),
                 ],
@@ -251,28 +265,33 @@ class ProfileScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.lightTheme.cardTheme.color,
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           l10n.logoutConfirmTitle,
           style: TextStyle(
-            color: AppTheme.lightTheme.textTheme.displayMedium?.color ?? Colors.white,
+            color: Theme.of(context).textTheme.titleLarge?.color,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
         content: Text(
           l10n.logoutConfirmContent,
-          style: const TextStyle(color: AppTheme.textColor),
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
         actions: [
           TextButton(
-            child: Text(l10n.cancel),
+            child: Text(l10n.cancel, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color)),
             onPressed: () => Navigator.of(context).pop(),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            child: Text(l10n.logout),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+            ),
+            child: Text(l10n.logout, style: const TextStyle(fontWeight: FontWeight.bold)),
             onPressed: () async {
               Navigator.of(context).pop();
               await _logout(context);
@@ -314,13 +333,13 @@ class ProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: AppTheme.lightTheme.primaryColor),
+          Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(
             flex: 2,
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text(label, style: const TextStyle(color: Colors.grey)),
+              child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
             ),
           ),
           Expanded(
@@ -335,14 +354,10 @@ class ProfileScreen extends StatelessWidget {
                             showDialog(
                               context: context,
                               builder: (dialogContext) => AlertDialog(
-                                backgroundColor: AppTheme.lightTheme.cardTheme.color,
+                                backgroundColor: Theme.of(context).dialogBackgroundColor,
                                 title: Text(
                                   l10n.reasonKycRejected,
-                                  style: TextStyle(
-                                    color: AppTheme.lightTheme.textTheme.displayMedium?.color ?? Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 content: SingleChildScrollView(child: Text(value)),
                                 actions: [
@@ -354,7 +369,7 @@ class ProfileScreen extends StatelessWidget {
                               ),
                             );
                           },
-                    child: Text(
+                          child: Text(
                             value,
                             style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
                             textAlign: TextAlign.right,
@@ -363,15 +378,15 @@ class ProfileScreen extends StatelessWidget {
                           ),
                         )
                       : Text(
-                      value,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.right,
-                      overflow: TextOverflow.ellipsis,
-                  ),
+                          value,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.right,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                 ),
                 if (copyable && value.isNotEmpty)
                   IconButton(
-                    icon: const Icon(Icons.copy, size: 18, color: Colors.deepPurple),
+                    icon: Icon(Icons.copy, size: 18, color: Theme.of(context).colorScheme.primary),
                     tooltip: l10n.copyReferralCode,
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: value));

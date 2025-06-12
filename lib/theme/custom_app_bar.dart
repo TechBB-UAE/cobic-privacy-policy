@@ -10,15 +10,36 @@ class CustomAppBar extends AppBar {
     List<Widget>? actions,
     Widget? leading,
     bool centerTitle = true,
+    TextStyle? titleTextStyle,
   }) : super(
           key: key,
-          title: Text(titleText, style: const TextStyle(color: AppTheme.textColor)),
-          backgroundColor: backgroundColor ?? Colors.white,
+          title: Text(titleText, style: titleTextStyle),
+          backgroundColor: backgroundColor,
           iconTheme: IconThemeData(color: iconColor ?? AppTheme.textColor),
           elevation: 0,
-          surfaceTintColor: Colors.white,
+          surfaceTintColor: backgroundColor,
           centerTitle: centerTitle,
           actions: actions,
           leading: leading,
         );
+
+  static PreferredSizeWidget themed({
+    required BuildContext context,
+    required String titleText,
+    List<Widget>? actions,
+    Widget? leading,
+    bool centerTitle = true,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return CustomAppBar(
+      titleText: titleText,
+      backgroundColor: isDark ? const Color(0xFF23242A) : Colors.white,
+      iconColor: theme.iconTheme.color,
+      actions: actions,
+      leading: leading,
+      centerTitle: centerTitle,
+      titleTextStyle: theme.appBarTheme.titleTextStyle ?? theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+    );
+  }
 } 

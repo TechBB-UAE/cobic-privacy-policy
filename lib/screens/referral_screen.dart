@@ -12,6 +12,7 @@ import 'package:cobic/services/referral_service.dart';
 import 'package:cobic/screens/scan_qr_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:cobic/widgets/language_switch_button.dart';
+import 'package:cobic/providers/theme_provider.dart';
 
 class ReferralScreen extends StatefulWidget {
   @override
@@ -47,21 +48,33 @@ class _ReferralScreenState extends State<ReferralScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: CustomAppBar.themed(
+        context: context,
         titleText: l10n.referral,
-        backgroundColor: Colors.white,
-        iconColor: AppTheme.textColor,
-        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.home, color: AppTheme.textColor),
+          icon: Icon(Icons.home, color: Theme.of(context).iconTheme.color),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/home', (route) => false);
           },
         ),
         actions: [
           const LanguageSwitchButton(),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) => IconButton(
+              icon: Icon(
+                themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              tooltip: themeProvider.isDarkMode ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối',
+              onPressed: () {
+                themeProvider.setThemeMode(
+                  themeProvider.isDarkMode ? ThemeMode.light : ThemeMode.dark
+                );
+              },
+            ),
+          ),
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner, color: AppTheme.textColor),
+            icon: Icon(Icons.qr_code_scanner, color: Theme.of(context).iconTheme.color),
             onPressed: () async {
               await Navigator.of(context, rootNavigator: true).push(
                 MaterialPageRoute(builder: (_) => const ScanQrScreen(targetRoute: '/home')),
@@ -69,6 +82,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
             },
           ),
         ],
+        centerTitle: true,
       ),
       body: Consumer<ReferralProvider>(
         builder: (context, provider, child) {
@@ -107,9 +121,9 @@ class _ReferralScreenState extends State<ReferralScreen> {
                 // Thống kê lượt mời
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                    border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black12,
@@ -126,12 +140,12 @@ class _ReferralScreenState extends State<ReferralScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(l10n.invitedUsers, style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 13)),
+                          Text(l10n.invitedUsers, style: Theme.of(context).textTheme.bodySmall),
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              Text('${stats.currentReferrals}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: AppTheme.lightTheme.primaryColor)),
-                              Text('/${stats.maxReferrals}', style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
+                              Text('${stats.currentReferrals}', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+                              Text('/${stats.maxReferrals}', style: Theme.of(context).textTheme.bodySmall),
                             ],
                           ),
                         ],
@@ -139,9 +153,9 @@ class _ReferralScreenState extends State<ReferralScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text(l10n.remainingInvites, style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 13)),
+                          Text(l10n.remainingInvites, style: Theme.of(context).textTheme.bodySmall),
                           const SizedBox(height: 2),
-                          Text('${stats.remainingReferrals}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: AppTheme.lightTheme.primaryColor)),
+                          Text('${stats.remainingReferrals}', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
                         ],
                       ),
                     ],
@@ -149,13 +163,13 @@ class _ReferralScreenState extends State<ReferralScreen> {
                 ),
                 const SizedBox(height: 24),
                 // Người đã mời
-                Text(l10n.invitedByYou, style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(l10n.invitedByYou, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                    border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black12,
@@ -170,27 +184,27 @@ class _ReferralScreenState extends State<ReferralScreen> {
                       if (totalInvited == 0)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Text(l10n.noInvitedUsers, style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
+                          child: Text(l10n.noInvitedUsers, style: Theme.of(context).textTheme.bodyMedium),
                         )
                       else ...[
                         ...pagedUsers.map((user) => Container(
                           margin: const EdgeInsets.only(bottom: 8),
                           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.surface,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                            border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
                           ),
                           child: Row(
                             children: [
                               CircleAvatar(
                                 radius: 16,
-                                backgroundColor: AppTheme.lightTheme.primaryColor.withOpacity(0.15),
-                                child: Icon(Icons.person, color: AppTheme.lightTheme.primaryColor, size: 20),
+                                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                                child: Icon(Icons.person, color: Theme.of(context).colorScheme.primary, size: 20),
                               ),
                               const SizedBox(width: 10),
-                              Expanded(child: Text(user.username, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15))),
-                              Text(l10n.joinedAt(_formatDate(user.joinedAt)), style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
+                              Expanded(child: Text(user.username, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold))),
+                              Text(l10n.joinedAt(_formatDate(user.joinedAt)), style: Theme.of(context).textTheme.bodySmall),
                             ],
                           ),
                         )),
@@ -201,14 +215,14 @@ class _ReferralScreenState extends State<ReferralScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.chevron_left, color: Colors.black45),
+                                  icon: Icon(Icons.chevron_left, color: Theme.of(context).iconTheme.color?.withOpacity(0.5)),
                                   onPressed: _currentPage > 0
                                       ? () => setState(() => _currentPage--)
                                       : null,
                                 ),
-                                Text('Trang ${_currentPage + 1}/$totalPages', style: TextStyle(color: AppTheme.secondaryTextColor)),
+                                Text('Trang ${_currentPage + 1}/$totalPages', style: Theme.of(context).textTheme.bodySmall),
                                 IconButton(
-                                  icon: const Icon(Icons.chevron_right, color: Colors.black45),
+                                  icon: Icon(Icons.chevron_right, color: Theme.of(context).iconTheme.color?.withOpacity(0.5)),
                                   onPressed: _currentPage < totalPages - 1
                                       ? () => setState(() => _currentPage++)
                                       : null,
@@ -222,13 +236,13 @@ class _ReferralScreenState extends State<ReferralScreen> {
                 ),
                 const SizedBox(height: 24),
                 // Người đã mời bạn
-                Text(l10n.invitedBy, style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(l10n.invitedBy, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                    border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black12,
@@ -244,32 +258,32 @@ class _ReferralScreenState extends State<ReferralScreen> {
                           children: [
                             CircleAvatar(
                               radius: 16,
-                              backgroundColor: AppTheme.lightTheme.primaryColor.withOpacity(0.15),
-                              child: Icon(Icons.person, color: AppTheme.lightTheme.primaryColor, size: 20),
+                              backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                              child: Icon(Icons.person, color: Theme.of(context).colorScheme.primary, size: 20),
                             ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(stats.whoReferredMe!.username, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15)),
-                                  Text(l10n.referralCodeLabel(stats.whoReferredMe!.referralCode), style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
+                                  Text(stats.whoReferredMe!.username, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                                  Text(l10n.referralCodeLabel(stats.whoReferredMe!.referralCode), style: Theme.of(context).textTheme.bodySmall),
                                 ],
                               ),
                             ),
                           ],
                         )
-                      : Text(l10n.noReferrer, style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
+                      : Text(l10n.noReferrer, style: Theme.of(context).textTheme.bodyMedium),
                 ),
                 const SizedBox(height: 24),
                 // Vòng tròn bảo mật
-                Text(l10n.securityCircle, style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(l10n.securityCircle, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                    border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black12,
@@ -285,32 +299,32 @@ class _ReferralScreenState extends State<ReferralScreen> {
                           children: [
                             CircleAvatar(
                               radius: 16,
-                              backgroundColor: AppTheme.lightTheme.primaryColor.withOpacity(0.15),
-                              child: Icon(Icons.verified_user, color: AppTheme.lightTheme.primaryColor, size: 20),
+                              backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                              child: Icon(Icons.verified_user, color: Theme.of(context).colorScheme.primary, size: 20),
                             ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(stats.securityCircles.first.username, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 15)),
-                                  Text(l10n.referralCodeLabel(stats.securityCircles.first.referralCode), style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
-                                  Text(l10n.joinedAt(_formatDate(stats.securityCircles.first.joinedAt)), style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
+                                  Text(stats.securityCircles.first.username, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                                  Text(l10n.referralCodeLabel(stats.securityCircles.first.referralCode), style: Theme.of(context).textTheme.bodySmall),
+                                  Text(l10n.joinedAt(_formatDate(stats.securityCircles.first.joinedAt)), style: Theme.of(context).textTheme.bodySmall),
                                 ],
                               ),
                             ),
                           ],
                         )
-                      : Text(l10n.noSecurityCircle, style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14)),
+                      : Text(l10n.noSecurityCircle, style: Theme.of(context).textTheme.bodyMedium),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   l10n.securityCircleDesc,
-                  style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 24),
                 // Mã giới thiệu của bạn
-                Text(l10n.yourReferralCode, style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(l10n.yourReferralCode, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
                 Builder(
                   builder: (context) {
@@ -318,9 +332,9 @@ class _ReferralScreenState extends State<ReferralScreen> {
                     final referralCode = profileProvider.userInfo?['referralCode'] ?? '';
                     return Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                        border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black12,
@@ -334,7 +348,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: Text(referralCode, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, letterSpacing: 1.2, fontSize: 16)),
+                            child: Text(referralCode, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 1.2, fontSize: 16)),
                           ),
                           InkWell(
                             borderRadius: BorderRadius.circular(8),
@@ -347,10 +361,16 @@ class _ReferralScreenState extends State<ReferralScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: AppTheme.lightTheme.primaryColor.withOpacity(0.12),
+                                color: Theme.of(context).colorScheme.primary.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.25 : 0.12),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(Icons.copy, color: Colors.black54, size: 20),
+                              child: Icon(
+                                Icons.copy,
+                                color: Theme.of(context).brightness == Brightness.dark
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : Theme.of(context).colorScheme.primary,
+                                size: 20,
+                              ),
                             ),
                           ),
                         ],
@@ -359,17 +379,17 @@ class _ReferralScreenState extends State<ReferralScreen> {
                   },
                 ),
                 const SizedBox(height: 8),
-                Text(l10n.shareReferral, style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 12)),
+                Text(l10n.shareReferral, style: Theme.of(context).textTheme.bodySmall),
                 const SizedBox(height: 24),
                 // Nhập mã giới thiệu
-                Text(l10n.enterReferralCode, style: TextStyle(color: AppTheme.secondaryTextColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(l10n.enterReferralCode, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
                 if (stats.whoReferredMe != null)
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                      border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black12,
@@ -382,7 +402,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
                     child: Text(
                       l10n.alreadyEnteredCode,
-                      style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14),
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   )
                 else
@@ -393,13 +413,13 @@ class _ReferralScreenState extends State<ReferralScreen> {
                           controller: _referralCodeController,
                           decoration: InputDecoration(
                             hintText: l10n.referralCodeHint,
-                            hintStyle: TextStyle(color: AppTheme.secondaryTextColor),
+                            hintStyle: Theme.of(context).textTheme.bodySmall,
                             filled: true,
-                            fillColor: AppTheme.lightTheme.cardTheme.color,
+                            fillColor: Theme.of(context).colorScheme.surface,
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                             contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                           ),
-                          style: TextStyle(color: Colors.black, fontSize: 15),
+                          style: Theme.of(context).textTheme.bodyLarge,
                           enabled: !_isSubmitting,
                         ),
                       ),
@@ -431,14 +451,21 @@ class _ReferralScreenState extends State<ReferralScreen> {
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.lightTheme.primaryColor,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                             padding: const EdgeInsets.symmetric(horizontal: 24),
                           ),
                           child: _isSubmitting
                             ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : Text(l10n.apply, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                            : Text(
+                                l10n.apply,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.onPrimary,
+                                  fontSize: 15,
+                                ),
+                              ),
                         ),
                       ),
                     ],

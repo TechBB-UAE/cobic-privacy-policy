@@ -6,6 +6,10 @@ import 'dart:convert';
 import 'package:cobic/services/task_service.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:image/image.dart' as img;
+import 'package:cobic/theme/custom_app_bar.dart';
+import 'package:cobic/widgets/language_switch_button.dart';
+import 'package:cobic/providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 
 class TaskSubmitScreen extends StatefulWidget {
   final Map<String, dynamic> task;
@@ -159,13 +163,31 @@ class _TaskSubmitScreenState extends State<TaskSubmitScreen> {
   Widget build(BuildContext context) {
     final task = widget.task;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(task['title'] ?? 'Thực hiện nhiệm vụ'),
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.black),
-        elevation: 0,
+      appBar: CustomAppBar.themed(
+        context: context,
+        titleText: task['title'] ?? 'Thực hiện nhiệm vụ',
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          const LanguageSwitchButton(),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) => IconButton(
+              icon: Icon(
+                themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              tooltip: themeProvider.isDarkMode ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối',
+              onPressed: () {
+                themeProvider.setThemeMode(
+                  themeProvider.isDarkMode ? ThemeMode.light : ThemeMode.dark
+                );
+              },
+            ),
+          ),
+        ],
         centerTitle: true,
-        titleTextStyle: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -175,10 +197,10 @@ class _TaskSubmitScreenState extends State<TaskSubmitScreen> {
             children: [
               Card(
                 elevation: 0,
-                color: AppTheme.lightTheme.cardTheme.color,
+                color: Theme.of(context).cardColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                  side: BorderSide(color: Theme.of(context).dividerColor),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -187,21 +209,18 @@ class _TaskSubmitScreenState extends State<TaskSubmitScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.description_outlined, color: AppTheme.lightTheme.primaryColor),
+                          Icon(Icons.description_outlined, color: Theme.of(context).colorScheme.primary),
                           const SizedBox(width: 8),
-                          const Text(
+                          Text(
                             'Nội dung nhiệm vụ',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
                       const SizedBox(height: 12),
                       Text(
                         task['description'] ?? '',
-                        style: const TextStyle(fontSize: 15, height: 1.5),
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
                   ),
@@ -215,10 +234,10 @@ class _TaskSubmitScreenState extends State<TaskSubmitScreen> {
               if (_submission == null) ...[
                 Card(
                   elevation: 0,
-                  color: AppTheme.lightTheme.cardTheme.color,
+                  color: Theme.of(context).cardColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                    side: BorderSide(color: Theme.of(context).dividerColor),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -227,14 +246,11 @@ class _TaskSubmitScreenState extends State<TaskSubmitScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.image_outlined, color: AppTheme.lightTheme.primaryColor),
+                            Icon(Icons.image_outlined, color: Theme.of(context).colorScheme.primary),
                             const SizedBox(width: 8),
-                            const Text(
+                            Text(
                               'Ảnh minh chứng',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -248,18 +264,18 @@ class _TaskSubmitScreenState extends State<TaskSubmitScreen> {
                                   width: double.infinity,
                                   height: 200,
                                   decoration: BoxDecoration(
-                                    color: Colors.grey.withOpacity(0.1),
+                                    color: Theme.of(context).cardColor,
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                                    border: Border.all(color: Theme.of(context).dividerColor),
                                   ),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.add_photo_alternate_outlined, size: 48, color: Colors.grey.withOpacity(0.5)),
+                                      Icon(Icons.add_photo_alternate_outlined, size: 48, color: Theme.of(context).iconTheme.color?.withOpacity(0.5)),
                                       const SizedBox(height: 8),
                                       Text(
                                         'Chọn ảnh từ thư viện',
-                                        style: TextStyle(color: Colors.grey.withOpacity(0.7)),
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).hintColor),
                                       ),
                                     ],
                                   ),
@@ -305,9 +321,9 @@ class _TaskSubmitScreenState extends State<TaskSubmitScreen> {
                   child: ElevatedButton(
                     onPressed: _pickedImage == null || _isSubmitting ? null : _submitTask,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.lightTheme.primaryColor,
-                      foregroundColor: Colors.white,
-                      disabledForegroundColor: Colors.white.withOpacity(0.7),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      disabledForegroundColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),

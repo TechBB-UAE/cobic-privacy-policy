@@ -8,6 +8,8 @@ import 'package:cobic/screens/scan_qr_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:cobic/widgets/language_switch_button.dart';
+import 'package:cobic/providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({Key? key}) : super(key: key);
@@ -88,21 +90,27 @@ class _TaskListScreenState extends State<TaskListScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: CustomAppBar.themed(
+        context: context,
         titleText: l10n.tasks,
-        backgroundColor: Colors.white,
-        iconColor: AppTheme.textColor,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.home, color: AppTheme.textColor),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/home', (route) => false);
-          },
-        ),
         actions: [
           const LanguageSwitchButton(),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) => IconButton(
+              icon: Icon(
+                themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              tooltip: themeProvider.isDarkMode ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối',
+              onPressed: () {
+                themeProvider.setThemeMode(
+                  themeProvider.isDarkMode ? ThemeMode.light : ThemeMode.dark
+                );
+              },
+            ),
+          ),
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner, color: AppTheme.textColor),
+            icon: Icon(Icons.qr_code_scanner, color: Theme.of(context).iconTheme.color),
             onPressed: () async {
               await Navigator.of(context, rootNavigator: true).push(
                 MaterialPageRoute(builder: (_) => const ScanQrScreen(targetRoute: '/home')),
@@ -110,6 +118,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
             },
           ),
         ],
+        leading: IconButton(
+          icon: Icon(Icons.home, color: Theme.of(context).iconTheme.color),
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/home', (route) => false);
+          },
+        ),
+        centerTitle: true,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -121,8 +136,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
                       child: CupertinoSlidingSegmentedControl<String>(
                         groupValue: _selectedStatus,
-                        backgroundColor: Colors.grey.shade100,
-                        thumbColor: AppTheme.lightTheme.primaryColor,
+                        backgroundColor: Theme.of(context).cardColor,
+                        thumbColor: Theme.of(context).colorScheme.primary,
                         children: <String, Widget>{
                           'all': Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -130,7 +145,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                               l10n.all,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: _selectedStatus == 'all' ? Colors.white : Colors.black,
+                                color: _selectedStatus == 'all'
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : Theme.of(context).textTheme.bodyLarge?.color,
                               ),
                             ),
                           ),
@@ -140,7 +157,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                               l10n.notSubmitted,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: _selectedStatus == 'not_submitted' ? Colors.white : Colors.black,
+                                color: _selectedStatus == 'not_submitted'
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : Theme.of(context).textTheme.bodyLarge?.color,
                               ),
                             ),
                           ),
@@ -150,7 +169,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                               l10n.pendingTask,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: _selectedStatus == 'pending' ? Colors.white : Colors.black,
+                                color: _selectedStatus == 'pending'
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : Theme.of(context).textTheme.bodyLarge?.color,
                               ),
                             ),
                           ),
@@ -160,7 +181,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                               l10n.approvedTask,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: _selectedStatus == 'approved' ? Colors.white : Colors.black,
+                                color: _selectedStatus == 'approved'
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : Theme.of(context).textTheme.bodyLarge?.color,
                               ),
                             ),
                           ),
@@ -170,7 +193,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                               l10n.rejectedTask,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: _selectedStatus == 'rejected' ? Colors.white : Colors.black,
+                                color: _selectedStatus == 'rejected'
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : Theme.of(context).textTheme.bodyLarge?.color,
                               ),
                             ),
                           ),
@@ -220,13 +245,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.lightTheme.primaryColor,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: Theme.of(context).colorScheme.primary,
+                                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                 ),
-                                child: const Text('Thực hiện'),
+                                child: Text('Thực hiện', style: TextStyle(fontWeight: FontWeight.bold)),
                               );
                             }
 
@@ -278,9 +303,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
                           return Container(
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.withOpacity(0.13)),
+                              border: Border.all(color: Theme.of(context).dividerColor),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.06),
@@ -299,26 +324,22 @@ class _TaskListScreenState extends State<TaskListScreen> {
                                             ? Icons.check_circle
                                             : Icons.cancel,
                                 color: !hasSubmission 
-                                    ? AppTheme.lightTheme.primaryColor
+                                    ? Theme.of(context).colorScheme.primary
                                     : status == 'pending'
                                         ? Colors.orange
                                         : status == 'approved'
-                                            ? AppTheme.successColor
+                                            ? Colors.green
                                             : Colors.red,
                               ),
                               title: Text(
                                 task['title'] ?? '',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.textColor,
-                                  fontSize: 16,
-                                ),
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               subtitle: Text(
                                 task['description'] ?? '',
-                                style: TextStyle(color: AppTheme.secondaryTextColor),
+                                style: Theme.of(context).textTheme.bodyMedium,
                               ),
                               trailing: buildStatusButton(),
                             ),

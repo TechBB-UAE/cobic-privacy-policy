@@ -255,5 +255,31 @@
   "guestUsername": "Username:",
   "guestPassword": "Password:",
   "guestSaveInfoNote": "Save this information to log in later!",
-  "guestSavedToGallery": "Information saved to gallery!"
+  "guestSavedToGallery": "Information saved to gallery!",
+  "appTitle": "Cobic",
+  "theme": "Theme",
+  "systemTheme": "System",
+  "lightTheme": "Light",
+  "darkTheme": "Dark",
+  "@settings": {
+    "description": "Settings screen title"
+  },
+  "@language": {
+    "description": "Language setting"
+  },
+  "@theme": {
+    "description": "Theme setting"
+  },
+  "@systemTheme": {
+    "description": "System theme option"
+  },
+  "@lightTheme": {
+    "description": "Light theme option"
+  },
+  "@darkTheme": {
+    "description": "Dark theme option"
+  },
+  "cannotTransferToYourself": "Cannot transfer to yourself",
+  "recipientNotFound": "Recipient not found",
+  "invalidAmount": "Please enter a valid amount!"
 } 

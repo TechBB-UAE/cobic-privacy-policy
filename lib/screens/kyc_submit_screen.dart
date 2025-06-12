@@ -15,6 +15,9 @@ import 'package:cobic/screens/main_tab_screen.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:cobic/providers/theme_provider.dart';
+import 'package:intl/intl.dart';
+import 'package:cobic/theme/custom_app_bar.dart';
 
 class KycSubmitScreen extends StatefulWidget {
   const KycSubmitScreen({Key? key}) : super(key: key);
@@ -105,13 +108,16 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
       if (mounted) {
         try {
           await Provider.of<ProfileProvider>(context, listen: false).fetchUserInfo(context);
-        } catch (_) {}
+        } catch (e, stack) {
+          debugPrint('KYC fetchUserInfo error: $e\n$stack');
+        }
         Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const MainTabScreen(initialTab: 0)),
           (route) => false,
         );
       }
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('KYC submit error: $e\n$stack');
       ErrorUtils.showErrorToast(context, ErrorUtils.parseApiError(e));
     }
   }
@@ -125,15 +131,15 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
       ),
       builder: (context) => Container(
         decoration: BoxDecoration(
-          color: AppTheme.lightTheme.cardTheme.color,
+          color: Theme.of(context).cardColor,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         ),
         child: SafeArea(
           child: Wrap(
             children: [
               ListTile(
-                leading: Icon(Icons.camera_alt, color: AppTheme.lightTheme.primaryColor),
-                title: Text(AppLocalizations.of(context)!.kycTakePhoto, style: TextStyle(color: AppTheme.lightTheme.textTheme.bodyLarge?.color ?? Colors.white)),
+                leading: Icon(Icons.camera_alt, color: Theme.of(context).colorScheme.primary),
+                title: Text(AppLocalizations.of(context)!.kycTakePhoto, style: Theme.of(context).textTheme.bodyLarge),
                 onTap: () async {
                   Navigator.of(context).pop();
                   final pickedFile = await picker.pickImage(source: ImageSource.camera, imageQuality: 70);
@@ -143,8 +149,8 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.photo_library, color: AppTheme.lightTheme.primaryColor),
-                title: Text(AppLocalizations.of(context)!.kycChooseFromGallery, style: TextStyle(color: AppTheme.lightTheme.textTheme.bodyLarge?.color ?? Colors.white)),
+                leading: Icon(Icons.photo_library, color: Theme.of(context).colorScheme.primary),
+                title: Text(AppLocalizations.of(context)!.kycChooseFromGallery, style: Theme.of(context).textTheme.bodyLarge),
                 onTap: () async {
                   Navigator.of(context).pop();
                   final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
@@ -175,17 +181,19 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+      appBar: CustomAppBar.themed(
+        context: context,
+        titleText: l10n.kycSubmitTitle,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         centerTitle: true,
-        title: Text(l10n.kycSubmitTitle, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
       body: kycMessage != null
           ? Center(
               child: Card(
-                color: AppTheme.lightTheme.cardTheme.color,
+                color: Theme.of(context).cardColor,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 elevation: 2,
                 margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
@@ -194,11 +202,11 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.verified_user, color: AppTheme.lightTheme.primaryColor, size: 48),
+                      Icon(Icons.verified_user, color: Theme.of(context).colorScheme.primary, size: 48),
                       const SizedBox(height: 16),
                       Text(
                         kycMessage,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -215,10 +223,13 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                   children: [
                     TextFormField(
                       controller: _fullNameController,
+                      style: Theme.of(context).textTheme.bodyLarge,
                       decoration: InputDecoration(
                         labelText: l10n.kycFullName,
+                        labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                        hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
                         border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.person_outline),
+                        prefixIcon: Icon(Icons.person_outline, color: Theme.of(context).iconTheme.color),
                       ),
                       validator: (v) => v == null || v.isEmpty ? l10n.kycRequired : null,
                     ),
@@ -231,32 +242,55 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                           firstDate: DateTime(1900),
                           lastDate: DateTime.now(),
                           builder: (context, child) {
+                            final theme = Theme.of(context);
+                            final isDark = theme.brightness == Brightness.dark;
                             return Theme(
-                              data: Theme.of(context).copyWith(
-                                colorScheme: ColorScheme.light(
-                                  primary: AppTheme.lightTheme.primaryColor,
-                                  onPrimary: Colors.white,
-                                  surface: Colors.white,
-                                  onSurface: Colors.black,
-                                ),
-                              ),
+                              data: isDark
+                                  ? ThemeData.dark().copyWith(
+                                      colorScheme: theme.colorScheme.copyWith(
+                                        primary: theme.colorScheme.primary,
+                                        surface: theme.dialogBackgroundColor,
+                                        onSurface: theme.textTheme.bodyLarge?.color ?? Colors.white,
+                                      ),
+                                      dialogBackgroundColor: theme.dialogBackgroundColor,
+                                      textButtonTheme: TextButtonThemeData(
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: theme.colorScheme.primary,
+                                        ),
+                                      ),
+                                    )
+                                  : ThemeData.light().copyWith(
+                                      colorScheme: theme.colorScheme.copyWith(
+                                        primary: theme.colorScheme.primary,
+                                        surface: theme.dialogBackgroundColor,
+                                        onSurface: theme.textTheme.bodyLarge?.color ?? Colors.black,
+                                      ),
+                                      dialogBackgroundColor: theme.dialogBackgroundColor,
+                                      textButtonTheme: TextButtonThemeData(
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: theme.colorScheme.primary,
+                                        ),
+                                      ),
+                                    ),
                               child: child!,
                             );
                           },
                         );
                         if (picked != null) {
-                          _dobController.text = '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+                          _dobController.text = DateFormat('yyyy-MM-dd').format(picked);
                         }
                       },
                       child: IgnorePointer(
                         child: TextFormField(
                           controller: _dobController,
+                          style: Theme.of(context).textTheme.bodyLarge,
                           decoration: InputDecoration(
                             labelText: l10n.kycDobFormat,
+                            labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                            hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
                             border: const OutlineInputBorder(),
-                            prefixIcon: const Icon(Icons.cake_outlined),
+                            prefixIcon: Icon(Icons.cake_outlined, color: Theme.of(context).iconTheme.color),
                           ),
-                          style: const TextStyle(color: Colors.black),
                           validator: (v) => v == null || v.isEmpty ? l10n.kycRequired : null,
                         ),
                       ),
@@ -268,26 +302,26 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                           context: context,
                           showPhoneCode: false,
                           countryListTheme: CountryListThemeData(
-                            backgroundColor: AppTheme.lightTheme.cardTheme.color ?? Colors.white,
-                            textStyle: TextStyle(color: AppTheme.lightTheme.textTheme.bodyLarge?.color ?? Colors.white),
+                            backgroundColor: Theme.of(context).cardColor,
+                            textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).textTheme.bodyLarge?.color),
                             inputDecoration: InputDecoration(
                               labelText: l10n.kycSearchCountry,
-                              labelStyle: TextStyle(color: AppTheme.lightTheme.primaryColor),
-                              prefixIcon: Icon(Icons.search, color: AppTheme.lightTheme.primaryColor),
+                              labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                              prefixIcon: Icon(Icons.search, color: Theme.of(context).iconTheme.color),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: AppTheme.lightTheme.primaryColor),
+                                borderSide: BorderSide(color: Theme.of(context).dividerColor),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: AppTheme.lightTheme.primaryColor, width: 2),
+                                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
                               ),
                             ),
                             borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(24),
                               topRight: Radius.circular(24),
                             ),
-                            searchTextStyle: TextStyle(color: AppTheme.lightTheme.primaryColor),
+                            searchTextStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
                             flagSize: 24,
                             bottomSheetHeight: 600,
                           ),
@@ -302,15 +336,19 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                       child: InputDecorator(
                         decoration: InputDecoration(
                           labelText: l10n.country,
+                          labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                          hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
                           border: const OutlineInputBorder(),
-                          prefixIcon: const Icon(Icons.flag_outlined),
+                          prefixIcon: Icon(Icons.flag_outlined, color: Theme.of(context).iconTheme.color),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(_selectedCountry?.name ?? l10n.kycSelectCountry,
-                              style: TextStyle(color: AppTheme.lightTheme.textTheme.bodyLarge?.color ?? Colors.white)),
-                            const Icon(Icons.arrow_drop_down),
+                              style: _selectedCountry != null
+                                  ? Theme.of(context).textTheme.bodyLarge
+                                  : Theme.of(context).inputDecorationTheme.hintStyle),
+                            Icon(Icons.arrow_drop_down, color: Theme.of(context).iconTheme.color),
                           ],
                         ),
                       ),
@@ -318,10 +356,13 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _addressController,
+                      style: Theme.of(context).textTheme.bodyLarge,
                       decoration: InputDecoration(
                         labelText: l10n.kycAddressOptional,
+                        labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                        hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
                         border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.location_on_outlined),
+                        prefixIcon: Icon(Icons.location_on_outlined, color: Theme.of(context).iconTheme.color),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -329,40 +370,42 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                       value: _documentType,
                       decoration: InputDecoration(
                         labelText: l10n.kycIdType,
+                        labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                        hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
                         border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.description_outlined),
+                        prefixIcon: Icon(Icons.description_outlined, color: Theme.of(context).iconTheme.color),
                       ),
                       items: [
                         DropdownMenuItem(
                           value: 'national_id',
-                          child: Text(l10n.kycNationalId, style: const TextStyle(color: Colors.black)),
+                          child: Text(l10n.kycNationalId, style: Theme.of(context).textTheme.bodyLarge),
                         ),
                         DropdownMenuItem(
                           value: 'passport',
-                          child: Text(l10n.kycPassport, style: const TextStyle(color: Colors.black)),
+                          child: Text(l10n.kycPassport, style: Theme.of(context).textTheme.bodyLarge),
                         ),
                         DropdownMenuItem(
                           value: 'drivers_license',
-                          child: Text(l10n.kycDriversLicense, style: const TextStyle(color: Colors.black)),
+                          child: Text(l10n.kycDriversLicense, style: Theme.of(context).textTheme.bodyLarge),
                         ),
                       ],
-                      dropdownColor: Colors.white,
-                      style: const TextStyle(color: Colors.black),
+                      dropdownColor: Theme.of(context).cardColor,
+                      style: Theme.of(context).textTheme.bodyLarge,
                       onChanged: (v) => setState(() => _documentType = v ?? 'national_id'),
                       validator: (v) => v == null || v.isEmpty ? l10n.kycRequired : null,
                     ),
                     const SizedBox(height: 16),
-                    Text(l10n.kycFrontImageTitle, style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(l10n.kycFrontImageTitle, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                     Row(
                       children: [
                         Expanded(
                           child: Container(
                             height: 90,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: Colors.grey.shade300, width: 1.2),
-                              boxShadow: const [
+                              border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
+                              boxShadow: [
                                 BoxShadow(
                                   color: Colors.black12,
                                   blurRadius: 4,
@@ -372,7 +415,7 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                             ),
                             child: _idCardFrontFile == null
                                 ? IconButton(
-                                    icon: Icon(Icons.add_a_photo, color: AppTheme.lightTheme.primaryColor, size: 32),
+                                    icon: Icon(Icons.add_a_photo, color: Theme.of(context).colorScheme.primary, size: 32),
                                     onPressed: () => _pickImage((img) => setState(() => _idCardFrontFile = img)),
                                     tooltip: l10n.kycSelectOrTakePhoto,
                                   )
@@ -393,11 +436,11 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                                         child: InkWell(
                                           onTap: () => setState(() => _idCardFrontFile = null),
                                           child: Container(
-                                            decoration: const BoxDecoration(
-                                              color: Colors.white70,
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context).cardColor.withOpacity(0.85),
                                               shape: BoxShape.circle,
                                             ),
-                                            child: const Icon(Icons.close, color: Colors.red, size: 20),
+                                            child: Icon(Icons.close, color: Colors.red, size: 20),
                                           ),
                                         ),
                                       ),
@@ -405,20 +448,15 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                                   ),
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(l10n.kycBackImageTitle, style: TextStyle(fontWeight: FontWeight.bold)),
-                    Row(
-                      children: [
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Container(
                             height: 90,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: Colors.grey.shade300, width: 1.2),
-                              boxShadow: const [
+                              border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
+                              boxShadow: [
                                 BoxShadow(
                                   color: Colors.black12,
                                   blurRadius: 4,
@@ -428,7 +466,7 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                             ),
                             child: _idCardBackFile == null
                                 ? IconButton(
-                                    icon: Icon(Icons.add_a_photo, color: AppTheme.lightTheme.primaryColor, size: 32),
+                                    icon: Icon(Icons.add_a_photo, color: Theme.of(context).colorScheme.primary, size: 32),
                                     onPressed: () => _pickImage((img) => setState(() => _idCardBackFile = img)),
                                     tooltip: l10n.kycSelectOrTakePhoto,
                                   )
@@ -449,11 +487,11 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                                         child: InkWell(
                                           onTap: () => setState(() => _idCardBackFile = null),
                                           child: Container(
-                                            decoration: const BoxDecoration(
-                                              color: Colors.white70,
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context).cardColor.withOpacity(0.85),
                                               shape: BoxShape.circle,
                                             ),
-                                            child: const Icon(Icons.close, color: Colors.red, size: 20),
+                                            child: Icon(Icons.close, color: Colors.red, size: 20),
                                           ),
                                         ),
                                       ),
@@ -464,72 +502,67 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    Text(l10n.kycSelfieImageTitle, style: TextStyle(fontWeight: FontWeight.bold)),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: 90,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: Colors.grey.shade300, width: 1.2),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 4,
-                                  offset: Offset(0, 2),
+                    Text(l10n.kycSelfieImageTitle, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    Container(
+                      height: 90,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: _selfieWithIdCardFile == null
+                          ? IconButton(
+                              icon: Icon(Icons.add_a_photo, color: Theme.of(context).colorScheme.primary, size: 32),
+                              onPressed: () => _pickImage((img) => setState(() => _selfieWithIdCardFile = img)),
+                              tooltip: l10n.kycSelectOrTakePhoto,
+                            )
+                          : Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: Image.file(
+                                    File(_selfieWithIdCardFile!.path),
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: InkWell(
+                                    onTap: () => setState(() => _selfieWithIdCardFile = null),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).cardColor.withOpacity(0.85),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(Icons.close, color: Colors.red, size: 20),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
-                            child: _selfieWithIdCardFile == null
-                                ? IconButton(
-                                    icon: Icon(Icons.add_a_photo, color: AppTheme.lightTheme.primaryColor, size: 32),
-                                    onPressed: () => _pickImage((img) => setState(() => _selfieWithIdCardFile = img)),
-                                    tooltip: l10n.kycSelectOrTakePhoto,
-                                  )
-                                : Stack(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(14),
-                                        child: Image.file(
-                                          File(_selfieWithIdCardFile!.path),
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 4,
-                                        right: 4,
-                                        child: InkWell(
-                                          onTap: () => setState(() => _selfieWithIdCardFile = null),
-                                          child: Container(
-                                            decoration: const BoxDecoration(
-                                              color: Colors.white70,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const Icon(Icons.close, color: Colors.red, size: 20),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                          ),
-                        ),
-                      ],
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
-                      height: 48,
                       child: ElevatedButton(
                         onPressed: _submitKyc,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.lightTheme.primaryColor,
+                          backgroundColor: Theme.of(context).colorScheme.primary,
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         child: Text(l10n.kycSubmit),
                       ),

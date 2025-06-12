@@ -26,6 +26,7 @@ import 'package:cobic/screens/scan_qr_screen.dart';
 import 'package:cobic/screens/user_info_card.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:cobic/providers/language_provider.dart';
+import 'package:cobic/providers/theme_provider.dart';
 import 'package:flutter/material.dart' show PopupMenuTheme, Theme, ThemeData, Colors;
 
 class HomeScreen extends StatefulWidget {
@@ -236,9 +237,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 180,
                   padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 0),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                    border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.08),
@@ -265,7 +266,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 'Tiếng Việt',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
-                                  color: current == 'vi' ? Colors.black : Colors.black.withOpacity(0.5),
+                                  color: current == 'vi'
+                                    ? Theme.of(context).textTheme.bodyLarge?.color
+                                    : Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.5),
                                 ),
                               ),
                             ],
@@ -287,7 +290,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 'English',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
-                                  color: current == 'en' ? Colors.black : Colors.black.withOpacity(0.5),
+                                  color: current == 'en'
+                                    ? Theme.of(context).textTheme.bodyLarge?.color
+                                    : Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.5),
                                 ),
                               ),
                             ],
@@ -315,11 +320,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final mining = Provider.of<MiningProvider>(context);
     final l10n = AppLocalizations.of(context)!;
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.appBarHomeColor,
-        iconTheme: const IconThemeData(color: AppTheme.textColor),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        iconTheme: Theme.of(context).appBarTheme.iconTheme,
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: [
@@ -345,15 +352,15 @@ class _HomeScreenState extends State<HomeScreen> {
           else
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppTheme.textColor,
-                side: BorderSide(color: Colors.grey.shade300, width: 1.2),
+                backgroundColor: Theme.of(context).cardColor,
+                foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+                side: BorderSide(color: Theme.of(context).dividerColor, width: 1.2),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                textStyle: const TextStyle(
-                  color: AppTheme.textColor,
+                textStyle: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -361,11 +368,11 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 Navigator.of(context).pushReplacementNamed('/login');
               },
-              icon: const Icon(Icons.person, color: AppTheme.textColor, size: 22),
+              icon: Icon(Icons.person, color: Theme.of(context).textTheme.bodyLarge?.color, size: 22),
               label: Text(
                 AppLocalizations.of(context)!.login,
-                style: const TextStyle(
-                  color: AppTheme.textColor,
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                   height: 1.2,
@@ -374,8 +381,20 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           const SizedBox(width: 8),
           IconButton(
+            icon: Icon(
+              themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+            tooltip: themeProvider.isDarkMode ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối',
+            onPressed: () {
+              themeProvider.setThemeMode(
+                themeProvider.isDarkMode ? ThemeMode.light : ThemeMode.dark
+              );
+            },
+          ),
+          IconButton(
             key: _langBtnKey,
-            icon: const Icon(Icons.language),
+            icon: Icon(Icons.language, color: Theme.of(context).textTheme.bodyLarge?.color),
             tooltip: 'Đổi ngôn ngữ',
             onPressed: _showLanguageOverlay,
           ),
@@ -508,24 +527,24 @@ class _UserMenuButtonState extends State<_UserMenuButton> {
               left: offset.dx + size.width - 180,
               child: Material(
                 color: Colors.transparent,
-              child: Container(
+                child: Container(
                   width: 180,
                   padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 0),
-                decoration: BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
-                  boxShadow: [
-                    BoxShadow(
+                    border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
                         color: Colors.black.withOpacity(0.08),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                       GestureDetector(
                         onTap: () {
                           _hideMenu();
@@ -535,14 +554,14 @@ class _UserMenuButtonState extends State<_UserMenuButton> {
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Text(
                             AppLocalizations.of(context)!.profile,
-                      style: TextStyle(
-                              color: AppTheme.textColor,
-                        fontWeight: FontWeight.bold,
+                            style: TextStyle(
+                              color: Theme.of(context).textTheme.bodyLarge?.color,
+                              fontWeight: FontWeight.bold,
                               fontSize: 18,
                             ),
                           ),
+                        ),
                       ),
-                    ),
                       const SizedBox(height: 6),
                       GestureDetector(
                         onTap: () {
@@ -553,16 +572,16 @@ class _UserMenuButtonState extends State<_UserMenuButton> {
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Text(
                             AppLocalizations.of(context)!.logout,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.red,
-                        fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.bold,
                               fontSize: 18,
                             ),
                           ),
                         ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -591,19 +610,19 @@ class _UserMenuButtonState extends State<_UserMenuButton> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.grey.shade300, width: 1.2),
+          border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.person, color: AppTheme.textColor, size: 22),
+            Icon(Icons.person, color: Theme.of(context).textTheme.bodyLarge?.color, size: 22),
             const SizedBox(width: 8),
             Text(
               widget.username,
-              style: const TextStyle(
-                color: AppTheme.textColor,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
                 height: 1.2,

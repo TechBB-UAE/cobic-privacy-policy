@@ -11,6 +11,7 @@ import 'package:cobic/utils/error_utils.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:cobic/widgets/language_switch_button.dart';
 import 'package:cobic/screens/scan_qr_screen.dart';
+import 'package:cobic/providers/theme_provider.dart';
 
 class MiningScreen extends StatefulWidget {
   final VoidCallback? onScanQR;
@@ -121,21 +122,33 @@ class _MiningScreenState extends State<MiningScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: CustomAppBar.themed(
+        context: context,
         titleText: l10n.mining,
-        backgroundColor: Colors.white,
-        iconColor: AppTheme.textColor,
-        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.home, color: AppTheme.textColor),
+          icon: Icon(Icons.home, color: Theme.of(context).iconTheme.color),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/home', (route) => false);
           },
         ),
         actions: [
           const LanguageSwitchButton(),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) => IconButton(
+              icon: Icon(
+                themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              tooltip: themeProvider.isDarkMode ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối',
+              onPressed: () {
+                themeProvider.setThemeMode(
+                  themeProvider.isDarkMode ? ThemeMode.light : ThemeMode.dark
+                );
+              },
+            ),
+          ),
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner, color: AppTheme.textColor),
+            icon: Icon(Icons.qr_code_scanner, color: Theme.of(context).iconTheme.color),
             onPressed: () async {
               await Navigator.of(context, rootNavigator: true).push(
                 MaterialPageRoute(builder: (_) => const ScanQrScreen(targetRoute: '/home')),
@@ -143,6 +156,7 @@ class _MiningScreenState extends State<MiningScreen> {
             },
           ),
         ],
+        centerTitle: true,
       ),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
@@ -166,21 +180,21 @@ class _MiningScreenState extends State<MiningScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                Text(
+                    Text(
                       miningRate.toStringAsFixed(4),
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        color: AppTheme.textColor,
+                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontWeight: FontWeight.bold,
                         fontSize: 32,
                       ),
-                ),
+                    ),
                     const SizedBox(width: 8),
                     Padding(
                       padding: EdgeInsets.only(bottom: 4),
                       child: Text(
-                  'Cobic/hr',
+                        'Cobic/hr',
                         style: TextStyle(
-                          color: AppTheme.lightTheme.primaryColor,
+                          color: Theme.of(context).colorScheme.primary,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -191,13 +205,13 @@ class _MiningScreenState extends State<MiningScreen> {
                 const SizedBox(height: 8),
                 Text(
                   l10n.miningRate,
-                  style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 20),
                 // Card mining
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
@@ -214,29 +228,21 @@ class _MiningScreenState extends State<MiningScreen> {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
-                            style: AppTheme.lightTheme.elevatedButtonTheme.style?.copyWith(
-                              minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
-                              foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-                                if (states.contains(MaterialState.disabled)) {
-                                  return AppTheme.textColor;
-                                }
-                                return Colors.white;
-                              }),
-                              backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-                                if (states.contains(MaterialState.disabled)) {
-                                  return Colors.grey.shade300;
-                                }
-                                return AppTheme.lightTheme.primaryColor;
-                              }),
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(48),
+                              backgroundColor: canMine ? Theme.of(context).colorScheme.primary : Theme.of(context).disabledColor,
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                              textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
                             onPressed: canMine ? _handleMining : null,
-                            icon: Icon(Icons.bolt, size: 22, color: canMine ? Colors.white : AppTheme.textColor),
+                            icon: Icon(Icons.bolt, size: 22, color: canMine ? Colors.white : Theme.of(context).iconTheme.color),
                             label: Text(
                               l10n.mine,
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: canMine ? Colors.white : AppTheme.textColor,
+                                color: canMine ? Colors.white : Theme.of(context).iconTheme.color,
                               ),
                             ),
                           ),
@@ -246,12 +252,12 @@ class _MiningScreenState extends State<MiningScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(l10n.nextMining, style: TextStyle(color: AppTheme.secondaryTextColor)),
+                            Text(l10n.nextMining, style: Theme.of(context).textTheme.bodyMedium),
                             Text(
                               canMine
                                 ? l10n.readyToMine
                                 : (nextMiningTime != null ? "${l10n.countingDown} (${_formatCountdown(_countdown)})" : l10n.countingDown),
-                              style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.lightTheme.primaryColor),
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
                             ),
                           ],
                         ),
@@ -259,8 +265,8 @@ class _MiningScreenState extends State<MiningScreen> {
                         LinearProgressIndicator(
                           value: _progressPercent(nextMiningTime),
                           minHeight: 6,
-                          backgroundColor: Colors.deepPurple.shade100,
-                          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.lightTheme.primaryColor!),
+                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
                         ),
                       ],
                     ),
@@ -270,9 +276,9 @@ class _MiningScreenState extends State<MiningScreen> {
                 // Card Quét VietQR
                 Container(
                   decoration: BoxDecoration(
-                  color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.grey.shade300, width: 1.2),
+                    border: Border.all(color: Theme.of(context).dividerColor, width: 1.2),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black12,
@@ -288,15 +294,15 @@ class _MiningScreenState extends State<MiningScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.qr_code_2, color: AppTheme.lightTheme.primaryColor, size: 28),
+                            Icon(Icons.qr_code_2, color: Theme.of(context).colorScheme.primary, size: 28),
                             const SizedBox(width: 8),
-                            Text(l10n.scanVietQR, style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.lightTheme.primaryColor, fontSize: 18)),
+                            Text(l10n.scanVietQR, style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary, fontSize: 18)),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Text(
                           l10n.scanVietQRDesc,
-                          style: TextStyle(color: AppTheme.secondaryTextColor, fontSize: 14),
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         const SizedBox(height: 16),
                         SizedBox(
@@ -305,12 +311,12 @@ class _MiningScreenState extends State<MiningScreen> {
                           child: ElevatedButton(
                             onPressed: widget.onScanQR,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.lightTheme.primaryColor,
-                              foregroundColor: Colors.white,
+                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               padding: const EdgeInsets.symmetric(horizontal: 18),
                             ),
-                            child: Text(l10n.scanNow, style: TextStyle(fontWeight: FontWeight.bold)),
+                            child: Text(l10n.scanNow, style: const TextStyle(fontWeight: FontWeight.bold)),
                           ),
                         ),
                       ],

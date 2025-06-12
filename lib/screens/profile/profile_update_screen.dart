@@ -10,6 +10,8 @@ import 'profile_screen.dart';
 import 'package:cobic/theme/custom_app_bar.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:cobic/providers/theme_provider.dart';
+import 'package:intl/intl.dart';
 
 class ProfileUpdateScreen extends StatefulWidget {
   final GlobalKey<NavigatorState>? navigatorKey;
@@ -67,6 +69,8 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? DateTime.now(),
@@ -74,14 +78,33 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
       lastDate: DateTime.now(),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: AppTheme.lightTheme.primaryColor,
-              onPrimary: Colors.white,
-              surface: AppTheme.lightTheme.cardTheme.color!,
-              onSurface: Colors.black,
-            ),
-          ),
+          data: isDark
+              ? ThemeData.dark().copyWith(
+                  colorScheme: theme.colorScheme.copyWith(
+                    primary: theme.colorScheme.primary,
+                    surface: theme.dialogBackgroundColor,
+                    onSurface: theme.textTheme.bodyLarge?.color ?? Colors.white,
+                  ),
+                  dialogBackgroundColor: theme.dialogBackgroundColor,
+                  textButtonTheme: TextButtonThemeData(
+                    style: TextButton.styleFrom(
+                      foregroundColor: theme.colorScheme.primary,
+                    ),
+                  ),
+                )
+              : ThemeData.light().copyWith(
+                  colorScheme: theme.colorScheme.copyWith(
+                    primary: theme.colorScheme.primary,
+                    surface: theme.dialogBackgroundColor,
+                    onSurface: theme.textTheme.bodyLarge?.color ?? Colors.black,
+                  ),
+                  dialogBackgroundColor: theme.dialogBackgroundColor,
+                  textButtonTheme: TextButtonThemeData(
+                    style: TextButton.styleFrom(
+                      foregroundColor: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
           child: child!,
         );
       },
@@ -209,7 +232,40 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: CustomAppBar(titleText: l10n.updateProfileTitle),
+      appBar: CustomAppBar.themed(
+        context: context,
+        titleText: l10n.updateProfileTitle,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.language, color: Theme.of(context).iconTheme.color),
+            tooltip: l10n.language,
+            onPressed: () {
+              // Thêm logic đổi ngôn ngữ nếu cần
+            },
+          ),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) => IconButton(
+              icon: Icon(
+                themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              tooltip: themeProvider.isDarkMode ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối',
+              onPressed: () {
+                themeProvider.setThemeMode(
+                  themeProvider.isDarkMode ? ThemeMode.light : ThemeMode.dark
+                );
+              },
+            ),
+          ),
+        ],
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        centerTitle: true,
+      ),
       body: Container(
         color: Theme.of(context).scaffoldBackgroundColor,
         child: SingleChildScrollView(
@@ -235,8 +291,11 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                   ),
                 TextFormField(
                   controller: _usernameController,
+                  style: Theme.of(context).textTheme.bodyLarge,
                   decoration: InputDecoration(
                     labelText: l10n.username,
+                    labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                    hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
                     border: const OutlineInputBorder(),
                     errorText: _usernameError,
                     suffixIcon: _isCheckingUsername
@@ -263,8 +322,11 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _fullNameController,
+                  style: Theme.of(context).textTheme.bodyLarge,
                   decoration: InputDecoration(
                     labelText: l10n.fullName,
+                    labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                    hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
                     border: const OutlineInputBorder(),
                   ),
                   validator: (value) {
@@ -276,8 +338,11 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
+                  style: Theme.of(context).textTheme.bodyLarge,
                   decoration: InputDecoration(
                     labelText: l10n.email,
+                    labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                    hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.email_outlined),
                   ),
@@ -296,26 +361,26 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                       context: context,
                       showPhoneCode: true,
                       countryListTheme: CountryListThemeData(
-                        backgroundColor: Colors.white,
-                        textStyle: const TextStyle(color: Color(0xFF7C3AED)),
+                        backgroundColor: Theme.of(context).cardColor,
+                        textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).textTheme.bodyLarge?.color),
                         inputDecoration: InputDecoration(
                           labelText: l10n.searchCountry,
-                          labelStyle: const TextStyle(color: Color(0xFF7C3AED)),
-                          prefixIcon: const Icon(Icons.search, color: Color(0xFF7C3AED)),
+                          labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                          prefixIcon: Icon(Icons.search, color: Theme.of(context).iconTheme.color),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(color: Color(0xFF7C3AED)),
+                            borderSide: BorderSide(color: Theme.of(context).dividerColor),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(color: Color(0xFF7C3AED), width: 2),
+                            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
                           ),
                         ),
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(24),
                           topRight: Radius.circular(24),
                         ),
-                        searchTextStyle: const TextStyle(color: Color(0xFF7C3AED)),
+                        searchTextStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
                         flagSize: 24,
                         bottomSheetHeight: 600,
                       ),
@@ -330,6 +395,8 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                   child: InputDecorator(
                     decoration: InputDecoration(
                       labelText: l10n.country,
+                      labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                      hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
                       border: const OutlineInputBorder(),
                     ),
                     child: Row(
@@ -352,8 +419,11 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _phoneController,
+                  style: Theme.of(context).textTheme.bodyLarge,
                   decoration: InputDecoration(
                     labelText: l10n.phone,
+                    labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                    hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.phone_outlined),
                     prefixText: _selectedCountry?.phoneCode != null ? '+${_selectedCountry!.phoneCode} ' : null,
@@ -369,8 +439,11 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _addressController,
+                  style: Theme.of(context).textTheme.bodyLarge,
                   decoration: InputDecoration(
                     labelText: l10n.address,
+                    labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                    hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.location_on_outlined),
                   ),
@@ -379,8 +452,11 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _bioController,
+                  style: Theme.of(context).textTheme.bodyLarge,
                   decoration: InputDecoration(
                     labelText: l10n.bio,
+                    labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                    hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.info_outline),
                     alignLabelWithHint: true,
@@ -403,6 +479,8 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                   child: InputDecorator(
                     decoration: InputDecoration(
                       labelText: l10n.dob,
+                      labelStyle: Theme.of(context).inputDecorationTheme.labelStyle,
+                      hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
                       border: const OutlineInputBorder(),
                     ),
                     child: Row(
@@ -410,13 +488,13 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                       children: [
                                 Text(
                                   _selectedDate != null
-                            ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+                            ? DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(_selectedDate!)
                                       : l10n.chooseDob,
-                                  style: TextStyle(
-                                    color: isKycApproved ? Colors.grey : Colors.black,
-                                  ),
+                                  style: _selectedDate != null
+                                      ? Theme.of(context).textTheme.bodyLarge
+                                      : Theme.of(context).inputDecorationTheme.hintStyle,
                                 ),
-                        const Icon(Icons.calendar_today),
+                        Icon(Icons.calendar_today, color: Theme.of(context).colorScheme.primary),
                       ],
                     ),
                   ),

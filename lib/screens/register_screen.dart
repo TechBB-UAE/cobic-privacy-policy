@@ -6,6 +6,9 @@ import 'package:cobic/screens/login_screen.dart';
 import 'package:cobic/screens/home_screen.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:cobic/providers/theme_provider.dart';
+import 'package:cobic/widgets/language_switch_button.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -65,11 +68,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.registerTitle),
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.black),
+        title: Text(l10n.registerTitle,
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: colorScheme.onBackground,
+              fontWeight: FontWeight.bold,
+            )),
+        backgroundColor: colorScheme.background,
+        iconTheme: IconThemeData(color: colorScheme.onBackground),
+        elevation: 0,
+        actions: [
+          const LanguageSwitchButton(),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) => IconButton(
+              icon: Icon(
+                themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                color: colorScheme.primary,
+              ),
+              tooltip: themeProvider.isDarkMode ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối',
+              onPressed: () {
+                themeProvider.setThemeMode(
+                  themeProvider.isDarkMode ? ThemeMode.light : ThemeMode.dark
+                );
+              },
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -90,7 +117,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _usernameController,
                   decoration: InputDecoration(
                     labelText: l10n.username,
-                    prefixIcon: const Icon(Icons.person),
+                    prefixIcon: Icon(Icons.person, color: colorScheme.primary),
                   ),
                   validator: (value) => (value == null || value.trim().isEmpty) ? l10n.usernameRequired : null,
                   enabled: !_loading,
@@ -100,7 +127,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _emailController,
                   decoration: InputDecoration(
                     labelText: l10n.email,
-                    prefixIcon: const Icon(Icons.email),
+                    prefixIcon: Icon(Icons.email, color: colorScheme.primary),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) return l10n.emailRequired;
@@ -116,9 +143,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: l10n.password,
-                    prefixIcon: const Icon(Icons.lock),
+                    prefixIcon: Icon(Icons.lock, color: colorScheme.primary),
                     suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: colorScheme.primary),
                       onPressed: () {
                         setState(() {
                           _obscurePassword = !_obscurePassword;
@@ -141,9 +168,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   obscureText: _obscureConfirmPassword,
                   decoration: InputDecoration(
                     labelText: l10n.confirmPassword,
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: Icon(Icons.lock_outline, color: colorScheme.primary),
                     suffixIcon: IconButton(
-                      icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                      icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility, color: colorScheme.primary),
                       onPressed: () {
                         setState(() {
                           _obscureConfirmPassword = !_obscureConfirmPassword;
@@ -158,7 +185,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 if (_error != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(_error!, style: const TextStyle(color: Colors.red)),
+                    child: Text(_error!, style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.error)),
                   ),
                 SizedBox(
                   width: double.infinity,
@@ -166,13 +193,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: ElevatedButton(
                     onPressed: _loading ? null : _register,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.lightTheme.primaryColor,
-                      foregroundColor: Colors.white,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: _loading
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : Text(l10n.register, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.onPrimary))
+                        : Text(l10n.register, style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onPrimary)),
                   ),
                 ),
                 TextButton(
@@ -183,7 +210,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             MaterialPageRoute(builder: (_) => const LoginScreen()),
                           );
                         },
-                  child: Text(l10n.alreadyHaveAccount),
+                  child: Text(l10n.alreadyHaveAccount, style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.primary)),
                 ),
               ],
             ),

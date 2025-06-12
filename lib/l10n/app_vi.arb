@@ -254,5 +254,31 @@
   "guestUsername": "Tên đăng nhập:",
   "guestPassword": "Mật khẩu:",
   "guestSaveInfoNote": "Lưu lại thông tin này để đăng nhập về sau!",
-  "guestSavedToGallery": "Đã lưu thông tin vào thư viện ảnh!"
+  "guestSavedToGallery": "Đã lưu thông tin vào thư viện ảnh!",
+  "appTitle": "Cobic",
+  "theme": "Giao diện",
+  "systemTheme": "Hệ thống",
+  "lightTheme": "Sáng",
+  "darkTheme": "Tối",
+  "@settings": {
+    "description": "Settings screen title"
+  },
+  "@language": {
+    "description": "Language setting"
+  },
+  "@theme": {
+    "description": "Theme setting"
+  },
+  "@systemTheme": {
+    "description": "System theme option"
+  },
+  "@lightTheme": {
+    "description": "Light theme option"
+  },
+  "@darkTheme": {
+    "description": "Dark theme option"
+  },
+  "cannotTransferToYourself": "Không thể chuyển cho chính mình",
+  "recipientNotFound": "Không tìm thấy người nhận",
+  "invalidAmount": "Vui lòng nhập số lượng hợp lệ!"
 }

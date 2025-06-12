@@ -12,7 +12,7 @@ class LanguageSwitchButton extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return IconButton(
-      icon: const Icon(Icons.language, color: Colors.black),
+      icon: Icon(Icons.language, color: Theme.of(context).iconTheme.color),
       onPressed: () {
         showModalBottomSheet(
           context: context,

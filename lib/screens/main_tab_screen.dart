@@ -69,7 +69,7 @@ class _MainTabScreenState extends State<MainTabScreen> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: IndexedStack(
           index: _currentIndex,
           children: [
@@ -114,21 +114,17 @@ class _MainTabScreenState extends State<MainTabScreen> {
         ),
         bottomNavigationBar: Theme(
           data: Theme.of(context).copyWith(
-            canvasColor: Colors.white,
-            // Nếu dùng Material 3, có thể thêm:
-            // colorScheme: Theme.of(context).colorScheme.copyWith(surface: Colors.white, surfaceTint: Colors.white),
+            canvasColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor ?? Theme.of(context).cardColor,
           ),
           child: BottomNavigationBar(
-            backgroundColor: Colors.white,
-            // Nếu có thuộc tính surfaceTintColor, thêm:
-            // surfaceTintColor: Colors.white,
+            backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor ?? Theme.of(context).cardColor,
             currentIndex: _currentIndex,
             onTap: (index) => setState(() => _currentIndex = index),
             type: BottomNavigationBarType.fixed,
-            selectedItemColor: const Color(0xFF0066cc),
-            unselectedItemColor: AppTheme.textColor.withOpacity(0.6),
-            selectedIconTheme: const IconThemeData(color: Color(0xFF0066cc)),
-            unselectedIconTheme: IconThemeData(color: AppTheme.textColor.withOpacity(0.6)),
+            selectedItemColor: Theme.of(context).colorScheme.primary,
+            unselectedItemColor: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
+            selectedIconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
+            unselectedIconTheme: IconThemeData(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6)),
             items: [
               BottomNavigationBarItem(icon: const Icon(Icons.person), label: l10n.profile),
               BottomNavigationBarItem(icon: const Icon(Icons.assignment), label: l10n.tasks),

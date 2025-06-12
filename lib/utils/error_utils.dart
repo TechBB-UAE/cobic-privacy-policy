@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:another_flushbar/flushbar.dart';
 import 'dart:convert';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ErrorUtils {
   static void showErrorToast(BuildContext context, String message) {
@@ -56,7 +57,7 @@ class ErrorUtils {
   }
 
   /// Parse lỗi trả về từ backend, ưu tiên error/message, list lỗi, hoặc fallback về lỗi chung
-  static String parseApiError(dynamic error) {
+  static String parseApiError(dynamic error, [BuildContext? context]) {
     if (error == null) return 'Đã xảy ra lỗi không xác định';
     // Ưu tiên xử lý DioException chuẩn
     try {
@@ -68,10 +69,25 @@ class ErrorUtils {
           if (response != null && response.data != null) {
             final data = response.data;
             if (data is Map) {
-              if (data['error'] != null) return data['error'].toString();
-              if (data['message'] != null) return data['message'].toString();
+              if (data['error'] != null) {
+                if (data['error'].toString().toLowerCase().contains('recipient not found') && context != null) {
+                  return AppLocalizations.of(context)!.recipientNotFound;
+                }
+                return data['error'].toString();
+              }
+              if (data['message'] != null) {
+                if (data['message'].toString().toLowerCase().contains('recipient not found') && context != null) {
+                  return AppLocalizations.of(context)!.recipientNotFound;
+                }
+                return data['message'].toString();
+              }
             }
-            if (data is String) return data;
+            if (data is String) {
+              if (data.toLowerCase().contains('recipient not found') && context != null) {
+                return AppLocalizations.of(context)!.recipientNotFound;
+              }
+              return data;
+            }
           }
         }
         // Nếu là chuỗi exception, cố gắng parse JSON trong chuỗi
@@ -80,8 +96,18 @@ class ErrorUtils {
           try {
             final data = json.decode(match.group(0)!);
             if (data is Map) {
-              if (data['error'] != null) return data['error'].toString();
-              if (data['message'] != null) return data['message'].toString();
+              if (data['error'] != null) {
+                if (data['error'].toString().toLowerCase().contains('recipient not found') && context != null) {
+                  return AppLocalizations.of(context)!.recipientNotFound;
+                }
+                return data['error'].toString();
+              }
+              if (data['message'] != null) {
+                if (data['message'].toString().toLowerCase().contains('recipient not found') && context != null) {
+                  return AppLocalizations.of(context)!.recipientNotFound;
+                }
+                return data['message'].toString();
+              }
             }
           } catch (_) {}
         }
@@ -91,11 +117,21 @@ class ErrorUtils {
     // Nếu là Exception chứa message
     if (error is Exception) {
       final msg = error.toString().replaceAll('Exception:', '').trim();
-      if (msg.isNotEmpty && msg != 'Dữ liệu không hợp lệ') return msg;
+      if (msg.isNotEmpty && msg != 'Dữ liệu không hợp lệ') {
+        if (msg.toLowerCase().contains('recipient not found') && context != null) {
+          return AppLocalizations.of(context)!.recipientNotFound;
+        }
+        return msg;
+      }
     }
     // Nếu là Map hoặc List
     final parsed = _parseErrorData(error);
-    if (parsed.isNotEmpty && parsed != 'Đã xảy ra lỗi không xác định' && parsed.toLowerCase() != 'dữ liệu không hợp lệ') return parsed;
+    if (parsed.isNotEmpty && parsed != 'Đã xảy ra lỗi không xác định' && parsed.toLowerCase() != 'dữ liệu không hợp lệ') {
+      if (parsed.toLowerCase().contains('recipient not found') && context != null) {
+        return AppLocalizations.of(context)!.recipientNotFound;
+      }
+      return parsed;
+    }
     return 'Có lỗi xảy ra, vui lòng thử lại!';
   }
 

@@ -4,6 +4,9 @@ import 'package:cobic/services/api_service.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'dart:async';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:cobic/providers/theme_provider.dart';
+import 'package:cobic/widgets/language_switch_button.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({Key? key}) : super(key: key);
@@ -67,11 +70,35 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.forgotPasswordTitle),
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.black),
+        title: Text(l10n.forgotPasswordTitle,
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: colorScheme.onBackground,
+              fontWeight: FontWeight.bold,
+            )),
+        backgroundColor: colorScheme.background,
+        iconTheme: IconThemeData(color: colorScheme.onBackground),
+        elevation: 0,
+        actions: [
+          const LanguageSwitchButton(),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) => IconButton(
+              icon: Icon(
+                themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                color: colorScheme.primary,
+              ),
+              tooltip: themeProvider.isDarkMode ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối',
+              onPressed: () {
+                themeProvider.setThemeMode(
+                  themeProvider.isDarkMode ? ThemeMode.light : ThemeMode.dark
+                );
+              },
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -81,16 +108,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.lock_reset, size: 60, color: AppTheme.primaryColor),
+                Icon(Icons.lock_reset, size: 60, color: colorScheme.primary),
                 const SizedBox(height: 18),
                 Text(l10n.forgotPasswordDesc,
-                  style: const TextStyle(fontSize: 15), textAlign: TextAlign.center),
+                  style: theme.textTheme.bodyMedium,
+                  textAlign: TextAlign.center),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
                     labelText: l10n.email,
-                    prefixIcon: const Icon(Icons.email),
+                    prefixIcon: Icon(Icons.email, color: colorScheme.primary),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) return l10n.emailRequired;
@@ -104,12 +132,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 if (_message != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(_message!, style: TextStyle(color: _message == l10n.resetLinkSent ? Colors.green : Colors.red)),
+                    child: Text(_message!, style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.secondary)),
                   ),
                 if (_error != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(_error!, style: const TextStyle(color: Colors.red)),
+                    child: Text(_error!, style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.error)),
                   ),
                 SizedBox(
                   width: double.infinity,
@@ -117,13 +145,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   child: ElevatedButton(
                     onPressed: _loading || _resendCooldown > 0 ? null : _submit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.lightTheme.primaryColor,
-                      foregroundColor: Colors.white,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: _loading
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : Text(_resendCooldown > 0 ? 'Gửi lại sau $_resendCooldown giây' : l10n.sendResetLink, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.onPrimary))
+                        : Text(_resendCooldown > 0 ? 'Gửi lại sau $_resendCooldown giây' : l10n.sendResetLink, style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onPrimary)),
                   ),
                 ),
               ],

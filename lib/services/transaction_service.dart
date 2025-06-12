@@ -20,11 +20,11 @@ class TransactionService {
         }
         return true;
       } else {
-        ErrorUtils.showErrorToast(context, ErrorUtils.parseApiError(res.data));
+        ErrorUtils.showErrorToast(context, ErrorUtils.parseApiError(res.data, context));
         return false;
       }
     } catch (e) {
-      ErrorUtils.showErrorToast(context, ErrorUtils.parseApiError(e));
+      ErrorUtils.showErrorToast(context, ErrorUtils.parseApiError(e, context));
       return false;
     }
   }
