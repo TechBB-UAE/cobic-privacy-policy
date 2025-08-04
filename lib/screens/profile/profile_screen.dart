@@ -15,7 +15,7 @@ import 'package:cobic/screens/main_tab_screen.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/screens/kyc_submit_screen.dart';
 import 'package:cobic/screens/scan_qr_screen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 import 'package:cobic/providers/language_provider.dart';
 import 'package:cobic/widgets/language_switch_button.dart';
 import 'package:cobic/providers/theme_provider.dart';
@@ -51,7 +51,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final profileProvider = Provider.of<ProfileProvider>(context);
+    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
     final userInfo = profileProvider.userInfo;
     final isLoading = profileProvider.isLoading;
     final error = profileProvider.error;

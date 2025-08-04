@@ -26,7 +26,6 @@ class AppTheme {
     brightness: Brightness.light,
     primaryColor: primaryColor,
     scaffoldBackgroundColor: appleBackground,
-    backgroundColor: appleBackground,
     appBarTheme: const AppBarTheme(
       backgroundColor: appleBackground,
       foregroundColor: textColor,
@@ -38,7 +37,7 @@ class AppTheme {
         fontSize: 20,
       ),
     ),
-    cardTheme: const CardTheme(
+    cardTheme: const CardThemeData(
       color: cardColor,
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -111,7 +110,7 @@ class AppTheme {
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
     ),
-    dialogTheme: const DialogTheme(
+    dialogTheme: const DialogThemeData(
       backgroundColor: cardColor,
       titleTextStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 20),
       contentTextStyle: TextStyle(color: textColor, fontSize: 16),
@@ -123,7 +122,6 @@ class AppTheme {
     brightness: Brightness.dark,
     primaryColor: darkPrimaryColor,
     scaffoldBackgroundColor: darkBackground,
-    backgroundColor: darkBackground,
     appBarTheme: const AppBarTheme(
       backgroundColor: darkBackground,
       foregroundColor: darkTextColor,
@@ -135,7 +133,7 @@ class AppTheme {
         fontSize: 20,
       ),
     ),
-    cardTheme: const CardTheme(
+    cardTheme: const CardThemeData(
       color: darkCardColor,
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -208,7 +206,7 @@ class AppTheme {
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
     ),
-    dialogTheme: const DialogTheme(
+    dialogTheme: const DialogThemeData(
       backgroundColor: darkCardColor,
       titleTextStyle: TextStyle(color: darkTextColor, fontWeight: FontWeight.bold, fontSize: 20),
       contentTextStyle: TextStyle(color: darkTextColor, fontSize: 16),

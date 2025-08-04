@@ -10,7 +10,7 @@ import 'package:cobic/providers/profile_provider.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/services/referral_service.dart';
 import 'package:cobic/screens/scan_qr_screen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import 'package:cobic/widgets/language_switch_button.dart';
 import 'package:cobic/providers/theme_provider.dart';
 
@@ -328,7 +328,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                 const SizedBox(height: 10),
                 Builder(
                   builder: (context) {
-                    final profileProvider = Provider.of<ProfileProvider>(context);
+                    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
                     final referralCode = profileProvider.userInfo?['referralCode'] ?? '';
                     return Container(
                       decoration: BoxDecoration(

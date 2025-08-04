@@ -6,7 +6,7 @@ import 'package:cobic/services/task_service.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/screens/scan_qr_screen.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 import 'package:cobic/widgets/language_switch_button.dart';
 import 'package:cobic/providers/theme_provider.dart';
 import 'package:provider/provider.dart';

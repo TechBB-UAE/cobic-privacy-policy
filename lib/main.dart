@@ -11,7 +11,7 @@ import 'package:cobic/screens/main_tab_screen.dart';
 import 'package:cobic/screens/login_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'l10n/app_localizations.dart';
 import 'providers/language_provider.dart';
 import 'screens/settings/settings_screen.dart';
 import 'providers/theme_provider.dart';

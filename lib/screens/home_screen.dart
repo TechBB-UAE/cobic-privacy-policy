@@ -7,7 +7,7 @@ import 'dart:ui' as ui;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+// import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -24,7 +24,7 @@ import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/services/profile_service.dart';
 import 'package:cobic/screens/scan_qr_screen.dart';
 import 'package:cobic/screens/user_info_card.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import 'package:cobic/providers/language_provider.dart';
 import 'package:cobic/providers/theme_provider.dart';
 import 'package:flutter/material.dart' show PopupMenuTheme, Theme, ThemeData, Colors;
@@ -318,9 +318,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final mining = Provider.of<MiningProvider>(context);
+    final mining = Provider.of<MiningProvider>(context, listen: false);
+    final profileProvider = Provider.of<ProfileProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     final l10n = AppLocalizations.of(context)!;
-    final themeProvider = Provider.of<ThemeProvider>(context);
     
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

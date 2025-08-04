@@ -3,7 +3,7 @@ import 'package:cobic/theme/app_theme.dart';
 import 'package:cobic/services/api_service.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'dart:async';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:cobic/providers/theme_provider.dart';
 import 'package:cobic/widgets/language_switch_button.dart';

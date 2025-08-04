@@ -7,7 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/screens/main_tab_screen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 import 'package:cobic/providers/theme_provider.dart';
 import 'package:intl/intl.dart';
 

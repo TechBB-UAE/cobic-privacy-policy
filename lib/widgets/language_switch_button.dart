@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cobic/providers/language_provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 
 class LanguageSwitchButton extends StatelessWidget {
   const LanguageSwitchButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final languageProvider = Provider.of<LanguageProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
     final l10n = AppLocalizations.of(context)!;
 
     return IconButton(

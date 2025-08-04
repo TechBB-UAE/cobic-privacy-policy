@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+// import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 
 class UserInfoCard extends StatefulWidget {
   final String username;
@@ -49,22 +49,11 @@ class _UserInfoCardState extends State<UserInfoCard> {
       var storageStatus = await Permission.storage.request();
 
       if (photosStatus.isGranted || storageStatus.isGranted) {
-        final result = await ImageGallerySaver.saveImage(
-          pngBytes,
-          quality: 100,
-          name: "cobic_guest_info_${DateTime.now().millisecondsSinceEpoch}"
-        );
-        if ((result['isSuccess'] == true || result['isSuccess'] == 1) && mounted) {
-          setState(() {
-            _message = AppLocalizations.of(context)!.guestSavedToGallery;
-            _messageColor = Colors.green;
-          });
-        } else {
-          setState(() {
-            _message = 'Lưu ảnh thất bại! (result: \\${result.toString()})';
-            _messageColor = Colors.red;
-          });
-        }
+        // TODO: Implement image saving functionality when image_gallery_saver is available
+        setState(() {
+          _message = 'Tính năng lưu ảnh tạm thời không khả dụng';
+          _messageColor = Colors.orange;
+        });
       } else {
         setState(() {
           _message = 'Không có quyền lưu ảnh vào Photos!';

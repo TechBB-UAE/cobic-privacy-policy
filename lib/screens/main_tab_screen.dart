@@ -10,7 +10,7 @@ import 'package:cobic/screens/wallet_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:cobic/screens/referral_screen.dart';
 import 'package:cobic/screens/scan_qr_screen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 // TODO: import các màn hình khác (task, mining, wallet, referral)
 
 class MainTabScreen extends StatefulWidget {
@@ -58,8 +58,8 @@ class _MainTabScreenState extends State<MainTabScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final miningProvider = Provider.of<MiningProvider>(context);
-    final profileProvider = Provider.of<ProfileProvider>(context);
+    final miningProvider = Provider.of<MiningProvider>(context, listen: false);
+    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
     final currentNavigator = _navigatorKeys[_currentIndex].currentState;
     bool showAppBar = true;
     if (currentNavigator != null && currentNavigator.canPop()) {

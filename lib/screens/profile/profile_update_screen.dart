@@ -9,7 +9,7 @@ import 'package:another_flushbar/flushbar.dart';
 import 'profile_screen.dart';
 import 'package:cobic/theme/custom_app_bar.dart';
 import 'package:cobic/utils/error_utils.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 import 'package:cobic/providers/theme_provider.dart';
 import 'package:intl/intl.dart';
 
@@ -468,7 +468,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                 const SizedBox(height: 16),
                 Builder(
                   builder: (context) {
-                    final userInfo = Provider.of<ProfileProvider>(context);
+                    final userInfo = Provider.of<ProfileProvider>(context, listen: false);
                     final kycStatus = userInfo.userInfo?['kycStatus']?.toString().toLowerCase();
                     final isKycApproved = kycStatus == 'approved';
                     return Column(

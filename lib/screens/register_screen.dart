@@ -5,7 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:cobic/screens/login_screen.dart';
 import 'package:cobic/screens/home_screen.dart';
 import 'package:cobic/utils/error_utils.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:cobic/providers/theme_provider.dart';
 import 'package:cobic/widgets/language_switch_button.dart';

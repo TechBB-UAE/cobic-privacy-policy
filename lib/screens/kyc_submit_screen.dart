@@ -14,7 +14,7 @@ import 'package:cobic/providers/profile_provider.dart';
 import 'package:cobic/screens/main_tab_screen.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import 'package:cobic/providers/theme_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:cobic/theme/custom_app_bar.dart';
@@ -169,7 +169,7 @@ class _KycSubmitScreenState extends State<KycSubmitScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final profileProvider = Provider.of<ProfileProvider>(context);
+    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
     final userInfo = profileProvider.userInfo;
     final kycStatus = userInfo?['kycStatus']?.toString().toLowerCase();
 

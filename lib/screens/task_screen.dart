@@ -1,17 +1,18 @@
 import 'package:cobic/widgets/language_switch_button.dart';
 import 'package:cobic/theme/custom_app_bar.dart';
 import 'package:cobic/screens/scan_qr_screen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import 'package:cobic/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class TaskScreen extends StatefulWidget {
-  // ... (existing code)
+  const TaskScreen({super.key});
+
+  @override
+  State<TaskScreen> createState() => _TaskScreenState();
 }
 
 class _TaskScreenState extends State<TaskScreen> {
-  // ... (existing code)
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -39,7 +40,9 @@ class _TaskScreenState extends State<TaskScreen> {
           ),
         ],
       ),
-      // ... (rest of the existing code)
+      body: Center(
+        child: Text(l10n.tasks),
+      ),
     );
   }
 } 

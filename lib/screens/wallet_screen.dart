@@ -8,7 +8,7 @@ import 'package:cobic/services/transaction_service.dart';
 import 'package:cobic/services/transaction_translation_service.dart';
 import 'dart:convert';
 import 'package:cobic/screens/scan_qr_screen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import 'package:cobic/widgets/language_switch_button.dart';
 import 'package:cobic/providers/theme_provider.dart';
 import 'package:cobic/utils/error_utils.dart';
@@ -151,7 +151,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final profileProvider = Provider.of<ProfileProvider>(context);
+    final profileProvider = Provider.of<ProfileProvider>(context, listen: true);
     final userInfo = profileProvider.userInfo;
     final balance = double.tryParse(userInfo?['balance']?.toString() ?? '0.00') ?? 0.0;
     final l10n = AppLocalizations.of(context)!;
@@ -227,54 +227,6 @@ class _WalletScreenState extends State<WalletScreen> {
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 28),
-            Column(
-              children: [
-                TextField(
-                  controller: _receiverController,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: InputDecoration(
-                    labelText: l10n.receiverName,
-                    labelStyle: Theme.of(context).textTheme.bodyMedium,
-                    filled: true,
-                    fillColor: Theme.of(context).cardColor,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _amountController,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: InputDecoration(
-                    labelText: l10n.amountCobic,
-                    labelStyle: Theme.of(context).textTheme.bodyMedium,
-                    filled: true,
-                    fillColor: Theme.of(context).cardColor,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: isSending ? null : _sendCobic,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                    ),
-                    child: isSending
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : Text(l10n.send, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                ),
-              ],
             ),
             const SizedBox(height: 28),
             Container(

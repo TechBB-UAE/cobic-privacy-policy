@@ -8,7 +8,7 @@ import 'package:cobic/utils/error_utils.dart';
 import 'package:cobic/screens/register_screen.dart';
 import 'package:cobic/screens/forgot_password_screen.dart';
 import 'package:cobic/screens/user_info_card.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
